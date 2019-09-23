@@ -1,4 +1,4 @@
-package base.ruleset;
+package base.knowledgebase;
 
 import base.domains.Domain;
 import base.rules.Rule;
@@ -8,18 +8,28 @@ import base.variables.Variable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RuleSet {
+public class KnowledgeBase {
+    private String name;
+
     private Variable goal;
     private List<Domain> usedDomains;
     private List<Variable> variables;
     private List<Rule> rules;
     private EnvironmentVariablesSet deductionSettings;
 
-    public RuleSet() {
+    public KnowledgeBase(String name) {
         usedDomains = new ArrayList<>();
         rules = new ArrayList<>();
         variables = new ArrayList<>();
         deductionSettings = new EnvironmentVariablesSet();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean goalIsDefined() {
