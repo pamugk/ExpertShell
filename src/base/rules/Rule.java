@@ -1,32 +1,61 @@
 package base.rules;
 
+import base.variables.Variable;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Rule {
-    private int idx;
-    private int priority;
-    private int cost;
     private String name;
+    private String comment;
 
     private List<Condition> conditions;
-    private Outcome outcome;
+    private List<Variable> needs;
+    private List<Outcome> outcomes;
+    private List<Variable> changes;
 
+    private int priority;
+    private int cost;
     private String reason;
 
-    public Rule(int idx, String name, List<Condition> conditions){
-        this.idx = idx;
+    public Rule(String name){
         this.name = name;
-        this.conditions = new ArrayList<>();
-        this.conditions.addAll(conditions);
+        conditions = new ArrayList<>();
+        needs = new ArrayList<>();
+        outcomes = new ArrayList<>();
+        changes = new ArrayList<>();
     }
 
-    public int getIdx() {
-        return idx;
+    public String getName() {
+        return name;
     }
 
-    public void setIdx(int idx) {
-        this.idx = idx;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public List<Condition> getConditions() {
+        return conditions;
+    }
+
+    public List<Outcome> getOutcomes() {
+        return outcomes;
+    }
+
+    public List<Variable> getNeeds() {
+        return needs;
+    }
+
+    public List<Variable> getChanges() {
+        return changes;
     }
 
     public int getPriority() {
@@ -45,33 +74,11 @@ public class Rule {
         this.cost = cost;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getReason() {
         return reason;
     }
 
     public void setReason(String reason) {
         this.reason = reason;
-    }
-
-    public Outcome getOutcome() {
-        return outcome;
-    }
-
-    public List<Condition> getConditions() {
-        return conditions;
-    }
-
-    public void setOutcome(Outcome outcome) {
-        if (outcome == null)
-            throw new NullPointerException();
-        this.outcome = outcome;
     }
 }
