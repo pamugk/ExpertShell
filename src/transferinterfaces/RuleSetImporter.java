@@ -1,6 +1,6 @@
 package transferinterfaces;
 
-import base.RuleSet;
+import base.ruleset.RuleSet;
 
 import java.util.Locale;
 

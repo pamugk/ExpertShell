@@ -1,7 +1,8 @@
-package base;
+package base.ruleset;
 
 import base.domains.Domain;
 import base.rules.Rule;
+import base.environmentvars.EnvironmentVariablesSet;
 import base.variables.Variable;
 
 import java.util.ArrayList;
@@ -12,11 +13,13 @@ public class RuleSet {
     private List<Domain> usedDomains;
     private List<Variable> variables;
     private List<Rule> rules;
+    private EnvironmentVariablesSet deductionSettings;
 
     public RuleSet() {
         usedDomains = new ArrayList<>();
         rules = new ArrayList<>();
         variables = new ArrayList<>();
+        deductionSettings = new EnvironmentVariablesSet();
     }
 
     public boolean goalIsDefined() {
@@ -41,5 +44,9 @@ public class RuleSet {
 
     public List<Rule> getRules() {
         return rules;
+    }
+
+    public EnvironmentVariablesSet getDeductionSettings() {
+        return deductionSettings;
     }
 }
