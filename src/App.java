@@ -4,12 +4,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class App extends Application {
-    private static final String fxmlPath = "editorGUI/editorform.fxml";
-    private static final String localisationPath = "editorGUI/localisation/editorLocalisation";
-    private static final String iconPath = "/editorGUI/icons/app_icon.png";
+    private static final String fxmlPath = "fxml/expertshellgui.fxml";
+    private static final String localisationPath = "localisation/shellLocalisation";
+    private static final String iconPath = "/icons/app.png";
 
     @Override
     public void start(Stage primaryStage) throws Exception{

@@ -3,10 +3,26 @@ package base.domains;
 import java.util.*;
 
 public class Domain<T extends Comparable<T>> {
+    private String guid;
+    private String name;
     private Set<T> values;
 
-    public Domain() {
+    public Domain(String guid, String name) {
+        this.guid = guid;
+        this.name= name;
         values = new HashSet<>();
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     private List<T> getValues() {

@@ -6,10 +6,10 @@ import base.environmentvars.WHN;
 import base.environmentvars.RIGR;
 
 public class Variable<T extends Comparable<T>> {
+    private String guid;
     private Domain<T> domain;
     private Classes varClass;
 
-    private int id;
     private String name;
     private String label;
     private WHN when;
@@ -17,8 +17,8 @@ public class Variable<T extends Comparable<T>> {
     private int limit;
     private RIGR rigor;
 
-    public Variable(int id, String name, Domain<T> domain, Classes varClass) {
-        this.id = id;
+    public Variable(String guid, String name, Domain<T> domain, Classes varClass) {
+        this.guid = guid;
         this.name = name;
         this.domain = domain;
         this.varClass = varClass;
@@ -34,20 +34,16 @@ public class Variable<T extends Comparable<T>> {
         this.domain = domain;
     }
 
+    public String getGuid() {
+        return guid;
+    }
+
     public Classes getVarClass() {
         return varClass;
     }
 
     public void setVarClass(Classes varClass) {
         this.varClass = varClass;
-    }
-
-    public int getId(){
-        return id;
-    }
-
-    public void setId(int id){
-        this.id = id;
     }
 
     public String getName() {
