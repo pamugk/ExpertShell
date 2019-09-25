@@ -1,24 +1,33 @@
 package expertshellgui;
 
 import base.domains.Domain;
+import base.knowledgebase.KnowledgeBase;
 import base.rules.Fact;
 import base.rules.Rule;
 import base.variables.Classes;
 import base.variables.Variable;
 import expertsystem.ExpertSystem;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import transfer.interfaces.KnowledgeBaseExporter;
 import transfer.interfaces.KnowledgeBaseImporter;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -26,7 +35,9 @@ public class ExpertShellController {
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private ExpertSystem expertSystem;
     private KnowledgeBaseExporter kbExporter;
+    private File kbFile;
     private KnowledgeBaseImporter kbImporter;
+    private Stage stage;
 
     public ExpertSystem getExpertSystem() { return  expertSystem; }
     public void setExpertSystem(ExpertSystem expertSystem) { this.expertSystem = expertSystem; }
@@ -36,6 +47,9 @@ public class ExpertShellController {
 
     public KnowledgeBaseImporter getKbImporter() { return kbImporter; }
     public void setKbImporter(KnowledgeBaseImporter kbImporter) { this.kbImporter = kbImporter; }
+
+    public Stage getStage() { return stage; }
+    public void setStage(Stage stage) { this.stage = stage; }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private void addDomain() {
@@ -50,12 +64,45 @@ public class ExpertShellController {
 
     }
 
+    private Optional<String> askKbName(String title, String header, String currentName) {
+        TextInputDialog kbNameDialog = new TextInputDialog(currentName);
+        TextField inputField = kbNameDialog.getEditor();
+        BooleanBinding isInvalid = Bindings.createBooleanBinding(() ->
+                inputField.getText().trim().equals(""), inputField.textProperty());
+        kbNameDialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(isInvalid);
+        kbNameDialog.setTitle(title);
+        kbNameDialog.setHeaderText(header);
+        return kbNameDialog.showAndWait();
+    }
+
+    private void changeInterfaceState() {
+        boolean disable = !expertSystem.kbIsLoaded();
+
+        saveKbMenuItem.setDisable(disable);
+        saveKbTool.setDisable(disable);
+        saveKbAsMenuItem.setDisable(disable);
+        closeKbMenuItem.setDisable(disable);
+        closeKbTool.setDisable(disable);
+
+        addDomainMenuItem.setDisable(disable);
+        addRuleMenuItem.setDisable(disable);
+        addVariableMenuItem.setDisable(disable);
+        addTool.setDisable(disable);
+
+        domainsTableView.setDisable(disable);
+        rulesTableView.setDisable(disable);
+        variablesTableView.setDisable(disable);
+    }
+
     private void consult() {
 
     }
 
     private void closeKb() {
+        if (showDialog("closeKbTitle", "closeKbHeader", "closeKbMessage", Alert.AlertType.NONE))
+            saveKb();
         expertSystem.setKnowledgeBase(null);
+        changeInterfaceState();
     }
 
     private void editDomain() {
@@ -74,6 +121,15 @@ public class ExpertShellController {
 
     }
 
+    private FileChooser generateFileChooser(String title, List<String> fileExtDescrs, List<String> fileExts) {
+        FileChooser kbChooser = new FileChooser();
+        for (int i = 0; i < fileExtDescrs.size(); i++)
+            kbChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileExtDescrs.get(i),
+                    String.format("*.%s", fileExts.get(i))));
+        kbChooser.setTitle(title);
+        return kbChooser;
+    }
+
     @NotNull
     private EventHandler<ActionEvent> generateHandler(String handlerName) throws NoSuchMethodException {
         Method handlerMethod = this.getClass().getDeclaredMethod(handlerName);
@@ -86,21 +142,46 @@ public class ExpertShellController {
         };
     }
 
-    public void initialize() {
+    public void initialise() {
         mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
+        domainsTableView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldIdx, Number newIdx) {
+
+            }
+        });
         tabChanged(null, null, mainTabPane.getSelectionModel().getSelectedItem());
+        updateTitle();
     }
 
     private void newKb() {
-
+        askKbName(resources.getString("newKbTitle"),
+                resources.getString("newKbHeader"),
+                resources.getString("defaultKbName")
+        ).ifPresent(kbName -> expertSystem.setKnowledgeBase(new KnowledgeBase(kbName)));
+        updateTitle();
+        changeInterfaceState();
     }
 
     private void openKb() {
-
+        File newKbFile = generateFileChooser(resources.getString("openKb"),
+                Arrays.asList(resources.getString("fileExtDescr")),
+                        Arrays.asList(kbImporter.getFileExtension()))
+                        .showOpenDialog(stage);
+        if (newKbFile != null) {
+            kbFile = newKbFile;
+            KnowledgeBase loadedBase = kbImporter.importKnowledgeBase(kbFile);
+            if (loadedBase != null)
+                expertSystem.setKnowledgeBase(loadedBase);
+        }
+        changeInterfaceState();
+        updateTitle();
     }
 
     private void quit() {
-
+        if (expertSystem.kbIsLoaded())
+            closeKb();
+        stage.close();
     }
 
     private void reasoning() {
@@ -120,11 +201,22 @@ public class ExpertShellController {
     }
 
     private void saveKb() {
-
+        if (kbFile == null) {
+            saveKbAs();
+            return;
+        }
+        kbExporter.exportKnowledgeBase(kbFile, expertSystem.getKnowledgeBase());
     }
 
     private void saveKbAs() {
-
+        File newKbFile = generateFileChooser(resources.getString("saveKbAs"),
+                Arrays.asList(resources.getString("fileExtDescr")),
+                Arrays.asList(kbExporter.getFileExtension()))
+                .showSaveDialog(stage);
+        if (newKbFile != null) {
+            kbFile = newKbFile;
+            saveKb();
+        }
     }
 
     private void setActions(String involvedEntity) {
@@ -180,6 +272,13 @@ public class ExpertShellController {
         alert.getDialogPane().setContent(content);
         alert.setResizable(true);
         alert.showAndWait();
+    }
+
+    private void updateTitle() {
+        stage.setTitle(String.format("%s. %s", resources.getString("title"),
+                expertSystem.kbIsLoaded() ?
+                String.format("%s: %s.", resources.getString("kb"), expertSystem.getKnowledgeBase().getName()) :
+                        resources.getString("noKb")));
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Элементы управления">
@@ -356,7 +455,7 @@ public class ExpertShellController {
         else
             viewedEntity = "Variable";
         setActions(viewedEntity);
-        addTool.setText(resources.getString(String.format("add%s", viewedEntity)));
+        addTool.getTooltip().setText(resources.getString(String.format("add%s", viewedEntity)));
         editMenuItem.setText(resources.getString(String.format("edit%s", viewedEntity)));
         editTool.getTooltip().setText(resources.getString(String.format("edit%s", viewedEntity)));
         removeMenuItem.setText(resources.getString(String.format("remove%s", viewedEntity)));

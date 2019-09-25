@@ -3,6 +3,7 @@ package transfer;
 import base.knowledgebase.KnowledgeBase;
 import transfer.interfaces.KnowledgeBaseImporter;
 
+import java.io.File;
 import java.util.Locale;
 
 public class BinKnowledgeBaseImporter implements KnowledgeBaseImporter {
@@ -10,14 +11,10 @@ public class BinKnowledgeBaseImporter implements KnowledgeBaseImporter {
     public String getDescription(Locale usedLocale) {
         return null;
     }
-
     @Override
-    public void setup() {
-
-    }
-
+    public String getFileExtension() { return "bkb"; }
     @Override
-    public KnowledgeBase importRuleSet() {
+    public KnowledgeBase importKnowledgeBase(File inputFile) {
         return null;
     }
 }

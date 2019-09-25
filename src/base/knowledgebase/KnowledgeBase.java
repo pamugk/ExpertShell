@@ -18,6 +18,7 @@ public class KnowledgeBase {
     private EnvironmentVariablesSet deductionSettings;
 
     public KnowledgeBase(String name) {
+        this.name = name;
         usedDomains = new ArrayList<>();
         rules = new ArrayList<>();
         variables = new ArrayList<>();
