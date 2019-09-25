@@ -1,4 +1,4 @@
 package expertsystem;
 
-public class InferentialMechanism {
+class InferentialMechanism {
 }

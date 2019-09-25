@@ -1,21 +1,42 @@
 package expertshellgui;
 
+import base.domains.Domain;
+import base.rules.Fact;
+import base.rules.Rule;
+import base.variables.Classes;
+import base.variables.Variable;
+import expertsystem.ExpertSystem;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
+import javafx.scene.layout.Region;
+import org.jetbrains.annotations.NotNull;
+import transfer.interfaces.KnowledgeBaseExporter;
+import transfer.interfaces.KnowledgeBaseImporter;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class ExpertShellController {
+    //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
+    private ExpertSystem expertSystem;
+    private KnowledgeBaseExporter kbExporter;
+    private KnowledgeBaseImporter kbImporter;
+
+    public ExpertSystem getExpertSystem() { return  expertSystem; }
+    public void setExpertSystem(ExpertSystem expertSystem) { this.expertSystem = expertSystem; }
+
+    public KnowledgeBaseExporter getKbExporter() { return kbExporter; }
+    public void setKbExporter(KnowledgeBaseExporter kbExporter) { this.kbExporter = kbExporter; }
+
+    public KnowledgeBaseImporter getKbImporter() { return kbImporter; }
+    public void setKbImporter(KnowledgeBaseImporter kbImporter) { this.kbImporter = kbImporter; }
+    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private void addDomain() {
 
@@ -34,6 +55,7 @@ public class ExpertShellController {
     }
 
     private void closeKb() {
+        expertSystem.setKnowledgeBase(null);
     }
 
     private void editDomain() {
@@ -50,6 +72,23 @@ public class ExpertShellController {
 
     private void forget() {
 
+    }
+
+    @NotNull
+    private EventHandler<ActionEvent> generateHandler(String handlerName) throws NoSuchMethodException {
+        Method handlerMethod = this.getClass().getDeclaredMethod(handlerName);
+        return actionEvent -> {
+            try {
+                handlerMethod.invoke(this);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        };
+    }
+
+    public void initialize() {
+        mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
+        tabChanged(null, null, mainTabPane.getSelectionModel().getSelectedItem());
     }
 
     private void newKb() {
@@ -88,332 +127,240 @@ public class ExpertShellController {
 
     }
 
+    private void setActions(String involvedEntity) {
+        EventHandler<ActionEvent> addHandler;
+        EventHandler<ActionEvent> editHandler;
+        EventHandler<ActionEvent> removeHandler;
+
+        try {
+            addHandler = generateHandler(String.format("add%s", involvedEntity));
+            editHandler = generateHandler(String.format("edit%s", involvedEntity));
+            removeHandler = generateHandler(String.format("remove%s", involvedEntity));
+        }
+        catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        addTool.setOnAction(addHandler);
+        editMenuItem.setOnAction(editHandler);
+        editTool.setOnAction(editHandler);
+        removeMenuItem.setOnAction(removeHandler);
+        removeTool.setOnAction(removeHandler);
+    }
+
     private void setGoal() {
 
     }
 
     private void showAbout() {
+        showMessage(resources.getString("about"), resources.getString("aboutText"), Alert.AlertType.INFORMATION);
+    }
 
+    private boolean showDialog(String title, String header, String message, Alert.AlertType type){
+        Alert alert = new Alert(type, message, ButtonType.OK, ButtonType.CANCEL);
+        alert.setHeaderText(header);
+        alert.setTitle(title);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
     private void showHelp() {
+        showMessage(resources.getString("help"), resources.getString("helpText"), Alert.AlertType.INFORMATION);
+    }
 
+    private void showMessage(String title, String message, Alert.AlertType type){
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(title);
+        TextArea content = new TextArea(message);
+        content.setWrapText(true);
+        content.setEditable(false);
+        alert.getDialogPane().setContent(content);
+        alert.setResizable(true);
+        alert.showAndWait();
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Элементы управления">
     @FXML
+    private ResourceBundle resources;
+    @FXML
+    private URL location;
+    @FXML
     private MenuBar mainMenuBar;
-
     @FXML
     private Menu knowledgeBaseMenu;
-
     @FXML
     private MenuItem newKbMenuItem;
-
     @FXML
     private MenuItem openKbMenuItem;
-
     @FXML
     private MenuItem saveKbMenuItem;
-
     @FXML
     private MenuItem saveKbAsMenuItem;
-
     @FXML
     private MenuItem closeKbMenuItem;
-
     @FXML
     private MenuItem quitMenuItem;
-
     @FXML
     private Menu editMenu;
-
     @FXML
     private MenuItem addDomainMenuItem;
-
-    @FXML
-    private MenuItem editDomainMenuItem;
-
-    @FXML
-    private MenuItem removeDomainMenuItem;
-
     @FXML
     private MenuItem addVariableMenuItem;
-
-    @FXML
-    private MenuItem editVariableMenuItem;
-
-    @FXML
-    private MenuItem removeVariableMenuItem;
-
     @FXML
     private MenuItem addRuleMenuItem;
-
     @FXML
     private MenuItem editMenuItem;
-
     @FXML
     private MenuItem removeMenuItem;
-
     @FXML
     private Menu consultMenu;
-
     @FXML
     private MenuItem setGoalMenuItem;
-
     @FXML
     private MenuItem consultMenuItem;
-
     @FXML
     private MenuItem forgetMenuItem;
-
     @FXML
     private Menu reasoningMenu;
-
     @FXML
     private MenuItem reasoningMenuItem;
-
     @FXML
     private Menu helpMenu;
-
     @FXML
     private MenuItem helpMenuItem;
-
     @FXML
     private MenuItem aboutMenuItem;
-
     @FXML
     private ToolBar mainToolBar;
-
     @FXML
     private Button newKbTool;
-
     @FXML
     private Button openKbTool;
-
     @FXML
     private Button saveKbTool;
-
     @FXML
     private Button closeKbTool;
-
     @FXML
-    private Button newTool;
-
+    private Button addTool;
     @FXML
     private Button editTool;
-
     @FXML
     private Button removeTool;
-
     @FXML
     private Button consultTool;
-
     @FXML
     private Button reasoningTool;
-
     @FXML
     private Button helpTool;
-
     @FXML
     private TabPane mainTabPane;
-
     @FXML
     private Tab domainsTab;
-
     @FXML
-    private TableColumn<?, ?> domainNameColumn;
-
+    private TableColumn<Domain, String> domainNameColumn;
     @FXML
-    private TableColumn<?, ?> domainTypeColumn;
-
+    private TableColumn<Domain, String> domainTypeColumn;
     @FXML
-    private TableView<?> domainsTableView;
-
+    private TableView<Domain> domainsTableView;
     @FXML
     private ListView<?> domainValuesListView;
-
     @FXML
     private Tab variablesTab;
-
     @FXML
-    private TableView<?> variablesTableView;
-
+    private TableView<Variable> variablesTableView;
     @FXML
-    private TableColumn<?, ?> variableNameColumn;
-
+    private TableColumn<Variable, String> variableNameColumn;
     @FXML
-    private TableColumn<?, ?> variableAttributionColumn;
-
+    private TableColumn<Variable, Classes> variableAttributionColumn;
     @FXML
-    private TableColumn<?, ?> variableDomainColumn;
-
+    private TableColumn<Variable, Domain> variableDomainColumn;
     @FXML
-    private TableColumn<?, ?> variableTypeColumn;
-
+    private TableColumn<Variable, String> variableTypeColumn;
     @FXML
     private TextField variableDomainTextField;
-
     @FXML
     private TextField variableAttributionTextField;
-
     @FXML
     private TextArea variableQuestionTextArea;
-
     @FXML
     private Tab rulesTab;
-
     @FXML
-    private TableView<?> rulesTableView;
-
+    private TableView<Rule> rulesTableView;
     @FXML
-    private TableColumn<?, ?> ruleNameColumn;
-
+    private TableColumn<Rule, String> ruleNameColumn;
     @FXML
-    private TableColumn<?, ?> ruleContentColumn;
-
+    private TableColumn<Rule, String> ruleContentColumn;
     @FXML
-    private ListView<?> ruleConditionsListView;
-
+    private ListView<Fact> rulePremisesListView;
     @FXML
-    private ListView<?> ruleOutcomesListView;
-
+    private ListView<Fact> ruleConclusionsListView;
     @FXML
     private TextArea ruleCommentTextArea;
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Обработчики событий">
     @FXML
-    void aboutMenuItem_OnAction(ActionEvent event) {
-        showAbout();
-    }
-
+    void aboutMenuItem_OnAction(ActionEvent event) { showAbout(); }
     @FXML
-    void addDomainMenuItem_OnAction(ActionEvent event) {
-        addDomain();
-    }
-
+    void addDomain_OnAction(ActionEvent event) { addDomain(); }
     @FXML
-    void addRuleMenuItem_OnAction(ActionEvent event) {
-        addRule();
-    }
-
+    void addRule_OnAction(ActionEvent event) { addRule(); }
     @FXML
-    void addVariableMenuItem_OnAction(ActionEvent event) {
-        addVariable();
-    }
-
+    void addVariable_OnAction(ActionEvent event) { addVariable(); }
     @FXML
-    void closeKbMenuItem_OnAction(ActionEvent event) {
-        closeKb();
-    }
-
+    void closeKbMenuItem_OnAction(ActionEvent event) { closeKb(); }
     @FXML
-    void closeKbTool_OnAction(ActionEvent event) {
-        closeKb();
-    }
-
+    void closeKbTool_OnAction(ActionEvent event) { closeKb(); }
     @FXML
-    void consultMenuItem_OnAction(ActionEvent event) {
-        consult();
-    }
-
+    void consultMenuItem_OnAction(ActionEvent event) { consult(); }
     @FXML
-    void consultTool_OnAction(ActionEvent event) {
-        consult();
-    }
-
-    void editDomainMenuItem_OnAction(ActionEvent event) {
-        editDomain();
-    }
-
-    void editRuleMenuItem_OnAction(ActionEvent event) {
-        editRule();
-    }
-
-    void editVariableMenuItem_OnAction(ActionEvent event) {
-        editVariable();
-    }
-
+    void consultTool_OnAction(ActionEvent event) { consult(); }
     @FXML
-    void forgetMenuItem_OnAction(ActionEvent event) {
-        forget();
-    }
-
+    void forgetMenuItem_OnAction(ActionEvent event) { forget(); }
     @FXML
-    void helpMenuItem_OnAction(ActionEvent event) {
-        showHelp();
-    }
-
+    void helpMenuItem_OnAction(ActionEvent event) { showHelp(); }
     @FXML
-    void helpTool_OnAction(ActionEvent event) {
-        showHelp();
-    }
-
+    void helpTool_OnAction(ActionEvent event) { showHelp(); }
     @FXML
-    void newKbMenuItem_OnAction(ActionEvent event) {
-        newKb();
-    }
-
+    void newKbMenuItem_OnAction(ActionEvent event) { newKb(); }
     @FXML
-    void newKbTool_OnAction(ActionEvent event) {
-        newKb();
-    }
-
+    void newKbTool_OnAction(ActionEvent event) { newKb(); }
     @FXML
-    void openKbMenuItem_OnAction(ActionEvent event) {
-        openKb();
-    }
-
+    void openKbMenuItem_OnAction(ActionEvent event) { openKb(); }
     @FXML
-    void openKbTool_OnAction(ActionEvent event) {
-        openKb();
-    }
-
+    void openKbTool_OnAction(ActionEvent event) { openKb(); }
     @FXML
-    void quitMenuItem_OnAction(ActionEvent event) {
-        quit();
-    }
-
+    void quitMenuItem_OnAction(ActionEvent event) { quit(); }
     @FXML
-    void reasoningMenuItem_OnAction(ActionEvent event) {
-        reasoning();
-    }
-
+    void reasoningMenuItem_OnAction(ActionEvent event) { reasoning(); }
     @FXML
-    void reasoningTool_OnAction(ActionEvent event) {
-        reasoning();
-    }
-
-    void removeDomainMenuItem_OnAction(ActionEvent event) {
-        removeDomain();
-    }
-
-    void removeRuleMenuItem_OnAction(ActionEvent event) {
-        removeRule();
-    }
-
-    void removeVariableMenuItem_OnAction(ActionEvent event) {
-        removeVariable();
-    }
-
+    void reasoningTool_OnAction(ActionEvent event) { reasoning(); }
     @FXML
-    void saveKbAsMenuItem_OnAction(ActionEvent event) {
-        saveKbAs();
-    }
-
+    void saveKbAsMenuItem_OnAction(ActionEvent event) { saveKbAs(); }
     @FXML
-    void saveKbMenuItem_OnAction(ActionEvent event) {
-        saveKb();
-    }
-
+    void saveKbMenuItem_OnAction(ActionEvent event) { saveKb(); }
     @FXML
-    void saveKbTool_OnAction(ActionEvent event) {
-        saveKb();
-    }
-
+    void saveKbTool_OnAction(ActionEvent event) { saveKb(); }
     @FXML
-    void setGoalMenuItem_OnAction(ActionEvent event) {
-        setGoal();
+    void setGoalMenuItem_OnAction(ActionEvent event) { setGoal(); }
+
+    private void tabChanged(ObservableValue<? extends Tab> observableValue, Tab oldTab, Tab newTab) {
+        String viewedEntity = "";
+        if (newTab == domainsTab)
+            viewedEntity = "Domain";
+        else
+        if (newTab == rulesTab)
+            viewedEntity = "Rule";
+        else
+            viewedEntity = "Variable";
+        setActions(viewedEntity);
+        addTool.setText(resources.getString(String.format("add%s", viewedEntity)));
+        editMenuItem.setText(resources.getString(String.format("edit%s", viewedEntity)));
+        editTool.getTooltip().setText(resources.getString(String.format("edit%s", viewedEntity)));
+        removeMenuItem.setText(resources.getString(String.format("remove%s", viewedEntity)));
+        removeTool.getTooltip().setText(resources.getString(String.format("remove%s", viewedEntity)));
     }
     //</editor-fold>
 }

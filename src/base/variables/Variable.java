@@ -11,6 +11,7 @@ public class Variable<T extends Comparable<T>> {
     private Classes varClass;
 
     private String name;
+    private T value;
     private String label;
     private WHN when;
     private CFVA type;
@@ -34,63 +35,21 @@ public class Variable<T extends Comparable<T>> {
         this.domain = domain;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public Classes getVarClass() {
-        return varClass;
-    }
-
-    public void setVarClass(Classes varClass) {
-        this.varClass = varClass;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLabel(){
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public WHN getWhen() {
-        return when;
-    }
-
-    public void setWhen(WHN when) {
-        this.when = when;
-    }
-
-    public CFVA getType() {
-        return type;
-    }
-
-    public void setType(CFVA type) {
-        this.type = type;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
-    public RIGR getRigor() {
-        return rigor;
-    }
-
-    public void setRigor(RIGR rigor) {
-        this.rigor = rigor;
-    }
+    public T getValue() { return value; }
+    public void setValue(T value) { this.value = value; }
+    public String getGuid() { return guid; }
+    public Classes getVarClass() { return varClass; }
+    public void setVarClass(Classes varClass) { this.varClass = varClass; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getLabel(){ return label; }
+    public void setLabel(String label) { this.label = label; }
+    public WHN getWhen() { return when; }
+    public void setWhen(WHN when) { this.when = when; }
+    public CFVA getType() { return type; }
+    public void setType(CFVA type) { this.type = type; }
+    public int getLimit() { return limit; }
+    public void setLimit(int limit) { this.limit = limit; }
+    public RIGR getRigor() { return rigor; }
+    public void setRigor(RIGR rigor) { this.rigor = rigor; }
 }
