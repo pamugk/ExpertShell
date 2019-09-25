@@ -49,7 +49,7 @@ public class KnowledgeBase {
         return usedDomains;
     }
 
-    public List<Variable> variables() {
+    public List<Variable> getVariables() {
         return variables;
     }
 

@@ -4,32 +4,33 @@ import base.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Rule {
-    private String guid;
+    private UUID guid;
     private String name;
     private String comment;
 
     private List<Fact> premises;
     private List<Variable> needs;
-    private List<Fact> outcomes;
+    private List<Fact> conclusions;
     private List<Variable> changes;
 
     private int priority;
     private int cost;
     private String reason;
 
-    public Rule(String guid, String name){
+    public Rule(UUID guid, String name){
         this.guid = guid;
         this.name = name;
 
         premises = new ArrayList<>();
         needs = new ArrayList<>();
-        outcomes = new ArrayList<>();
+        conclusions = new ArrayList<>();
         changes = new ArrayList<>();
     }
 
-    public String getGuid() {
+    public UUID getGuid() {
         return guid;
     }
 
@@ -53,8 +54,8 @@ public class Rule {
         return premises;
     }
 
-    public List<Fact> getOutcomes() {
-        return outcomes;
+    public List<Fact> getConclusions() {
+        return conclusions;
     }
 
     public List<Variable> getNeeds() {

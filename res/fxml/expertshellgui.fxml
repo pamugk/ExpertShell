@@ -81,12 +81,12 @@
             <Menu fx:id="helpMenu" mnemonicParsing="false" text="%help">
                 <MenuItem fx:id="helpMenuItem" mnemonicParsing="false" onAction="#helpMenuItem_OnAction" text="%showHelp">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
                 <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" onAction="#aboutMenuItem_OnAction" text="%about">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="F1" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="F1" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
             </Menu>
@@ -254,7 +254,6 @@
                                 <TableColumn fx:id="variableNameColumn" prefWidth="147.0" text="%variableName" />
                                 <TableColumn fx:id="variableAttributionColumn" prefWidth="153.0" text="%variableAttribution" />
                                 <TableColumn fx:id="variableDomainColumn" prefWidth="130.0" text="%variableDomain" />
-                                <TableColumn fx:id="variableTypeColumn" prefWidth="222.0" text="%variableType" />
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -263,7 +262,7 @@
                         <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="SOMETIMES">
                             <TitledPane animated="false" text="%variableLabel">
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <TextField promptText="variableLabelPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <TextField fx:id="variableLabelTextField" editable="false" promptText="%variableLabelPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                 </AnchorPane>
                             </TitledPane>
                             <TitledPane animated="false" text="%variableDomain" VBox.vgrow="ALWAYS">

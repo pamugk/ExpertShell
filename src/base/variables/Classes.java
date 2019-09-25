@@ -1,8 +1,8 @@
 package base.variables;
 
 public enum Classes {
-    ASKED,
+    REQUESTED,
     DEDUCTED,
-    ASKED_DEDUCTED,
-    DEDUCTED_ASKED
+    REQUESTED_DEDUCTED,
+    DEDUCTED_REQUESTED
 }

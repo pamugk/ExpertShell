@@ -2,18 +2,20 @@ package base.domains;
 
 import java.util.*;
 
-public class Domain<T extends Comparable<T>> {
-    private String guid;
+public class Domain {
+    private UUID guid;
     private String name;
-    private Set<T> values;
+    private List<Value> values;
+    private String type;
 
-    public Domain(String guid, String name) {
+    public Domain(UUID guid, String name) {
         this.guid = guid;
         this.name= name;
-        values = new HashSet<>();
+        values = new ArrayList<>();
+        type = "String";
     }
 
-    public String getGuid() {
+    public UUID getGuid() {
         return guid;
     }
 
@@ -25,31 +27,31 @@ public class Domain<T extends Comparable<T>> {
         this.name = name;
     }
 
-    private List<T> getValues() {
-        return new ArrayList<>(values);
+    public List<Value> getValues() {
+        return values;
     }
 
-    public boolean contains(T value) {
+    public boolean contains(String value) {
         return values.contains(value);
     }
 
-    public boolean containsAll(Collection<T> values) {
+    public boolean containsAll(Collection<String> values) {
         return this.values.containsAll(values);
     }
 
-    public boolean add(T value) {
-        return values.add(value);
-    }
-
-    public boolean addAll(Collection<T> values) {
-        return this.values.addAll(values);
-    }
-
-    public boolean remove(T value) {
+    public boolean remove(String value) {
         return values.remove(value);
     }
 
-    public boolean removeAll(Collection<T> values) {
+    public boolean removeAll(Collection<String> values) {
         return this.values.removeAll(values);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

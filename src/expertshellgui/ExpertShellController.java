@@ -1,6 +1,7 @@
 package expertshellgui;
 
 import base.domains.Domain;
+import base.domains.Value;
 import base.knowledgebase.KnowledgeBase;
 import base.rules.Fact;
 import base.rules.Rule;
@@ -9,29 +10,35 @@ import base.variables.Variable;
 import expertsystem.ExpertSystem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.jetbrains.annotations.NotNull;
 import transfer.interfaces.KnowledgeBaseExporter;
 import transfer.interfaces.KnowledgeBaseImporter;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Map.entry;
 
 public class ExpertShellController {
+    private Image addImage;
+    private Image editImage;
+    private Map<Classes, String> types;
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private ExpertSystem expertSystem;
     private KnowledgeBaseExporter kbExporter;
@@ -53,7 +60,24 @@ public class ExpertShellController {
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private void addDomain() {
-
+        Domain newDomain;
+        try {
+            newDomain = DomainDialogController.showAndWait(new Domain(UUID.randomUUID(),
+                            resources.getString("newDomain")), resources.getString("addDomain"),
+                    addImage, expertSystem.getKnowledgeBase(), resources);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        var currentIdx = domainsTableView.getSelectionModel().getSelectedIndex();
+        if (currentIdx == -1) {
+            expertSystem.getKnowledgeBase().getUsedDomains().add(newDomain);
+            domainsTableView.getItems().add(newDomain);
+        }
+        else{
+            expertSystem.getKnowledgeBase().getUsedDomains().add(currentIdx, newDomain);
+            domainsTableView.getItems().add(currentIdx, newDomain);
+        }
     }
 
     private void addRule() {
@@ -61,11 +85,33 @@ public class ExpertShellController {
     }
 
     private void addVariable() {
-
+        Variable newVariable;
+        try {
+            newVariable = VariableDialogController.showAndWait(new Variable(UUID.randomUUID(),
+                            resources.getString("newVariable"), null, Classes.REQUESTED),
+                    resources.getString("addVariable"),
+                    addImage, expertSystem.getKnowledgeBase(), resources);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        expertSystem.getKnowledgeBase().getUsedDomains().forEach(domain -> {
+            if (!domainsTableView.getItems().contains(domain))
+                domainsTableView.getItems().add(domain);
+        });
+        var currentIdx = domainsTableView.getSelectionModel().getSelectedIndex();
+        if (currentIdx == -1) {
+            expertSystem.getKnowledgeBase().getVariables().add(newVariable);
+            variablesTableView.getItems().add(newVariable);
+        }
+        else{
+            expertSystem.getKnowledgeBase().getVariables().add(currentIdx, newVariable);
+            variablesTableView.getItems().add(currentIdx, newVariable);
+        }
     }
 
     private Optional<String> askKbName(String title, String header, String currentName) {
-        TextInputDialog kbNameDialog = new TextInputDialog(currentName);
+        var kbNameDialog = new TextInputDialog(currentName);
         TextField inputField = kbNameDialog.getEditor();
         BooleanBinding isInvalid = Bindings.createBooleanBinding(() ->
                 inputField.getText().trim().equals(""), inputField.textProperty());
@@ -94,19 +140,50 @@ public class ExpertShellController {
         variablesTableView.setDisable(disable);
     }
 
+    private void changeSpecificActionsState(boolean disable) {
+        editMenuItem.setDisable(disable);
+        editTool.setDisable(disable);
+        removeMenuItem.setDisable(disable);
+        removeTool.setDisable(disable);
+    }
+
     private void consult() {
 
     }
 
     private void closeKb() {
-        if (showDialog("closeKbTitle", "closeKbHeader", "closeKbMessage", Alert.AlertType.NONE))
+        if (showDialog(resources.getString("closeKbTitle"), resources.getString("closeKbHeader"),
+                resources.getString("closeKbMessage"), Alert.AlertType.NONE))
             saveKb();
         expertSystem.setKnowledgeBase(null);
+        domainsTableView.getItems().clear();
+        variablesTableView.getItems().clear();
+        rulesTableView.getItems().clear();
         changeInterfaceState();
     }
 
-    private void editDomain() {
+    private void domainTableViewSelectionChanged(ObservableValue<? extends Number> observableValue, Number oldIndex,
+                                                 Number newIndex) {
+        boolean disable = newIndex.intValue() == -1;
+        changeSpecificActionsState(disable);
+        domainValuesListView.getItems().clear();
+        if (!disable)
+            domainValuesListView.getItems().addAll(domainsTableView.getSelectionModel().getSelectedItem().getValues());
+    }
 
+    private void editDomain() {
+        int idx = domainsTableView.getSelectionModel().getSelectedIndex();
+        Domain editedDomain;
+        try {
+            editedDomain = DomainDialogController.showAndWait(
+                   domainsTableView.getItems().get(idx), resources.getString("editDomain"),
+                    editImage, expertSystem.getKnowledgeBase(), resources
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        domainsTableView.getItems().set(idx, editedDomain);
     }
 
     private void editRule() {
@@ -114,7 +191,22 @@ public class ExpertShellController {
     }
 
     private void editVariable() {
-
+        int idx = variablesTableView.getSelectionModel().getSelectedIndex();
+        Variable editedVariable;
+        try {
+            editedVariable = VariableDialogController.showAndWait(
+                    variablesTableView.getItems().get(idx), resources.getString("editVariable"),
+                    editImage, expertSystem.getKnowledgeBase(), resources
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        expertSystem.getKnowledgeBase().getUsedDomains().forEach(domain -> {
+            if (!domainsTableView.getItems().contains(domain))
+                domainsTableView.getItems().add(domain);
+        });
+        variablesTableView.getItems().set(idx, editedVariable);
     }
 
     private void forget() {
@@ -143,15 +235,14 @@ public class ExpertShellController {
     }
 
     public void initialise() {
-        mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
-        domainsTableView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldIdx, Number newIdx) {
-
-            }
-        });
         tabChanged(null, null, mainTabPane.getSelectionModel().getSelectedItem());
         updateTitle();
+        types = Map.ofEntries(
+                entry(Classes.REQUESTED, resources.getString("varReq")),
+                entry(Classes.DEDUCTED, resources.getString("varDed")),
+                entry(Classes.REQUESTED_DEDUCTED, resources.getString("varRD")),
+                entry(Classes.DEDUCTED_REQUESTED, resources.getString("varDR"))
+        );
     }
 
     private void newKb() {
@@ -165,8 +256,8 @@ public class ExpertShellController {
 
     private void openKb() {
         File newKbFile = generateFileChooser(resources.getString("openKb"),
-                Arrays.asList(resources.getString("fileExtDescr")),
-                        Arrays.asList(kbImporter.getFileExtension()))
+                Collections.singletonList(resources.getString("fileExtDescr")),
+                Collections.singletonList(kbImporter.getFileExtension()))
                         .showOpenDialog(stage);
         if (newKbFile != null) {
             kbFile = newKbFile;
@@ -189,15 +280,49 @@ public class ExpertShellController {
     }
 
     private void removeDomain() {
-
+        int idx = domainsTableView.getSelectionModel().getSelectedIndex();
+        domainsTableView.getItems().remove(idx);
+        var kb = expertSystem.getKnowledgeBase();
+        var uuid = kb.getUsedDomains().get(idx).getGuid();
+        kb.getUsedDomains().remove(idx);
+        var vars = kb.getVariables().stream().filter(variable ->
+                variable.getDomain().getGuid().equals(uuid)).collect(Collectors.toList());
+        kb.getVariables().removeAll(vars);
+        kb.getRules().removeIf(rule ->
+                rule.getPremises().stream().anyMatch(fact ->
+                        vars.contains(fact.getVariable()) || fact.isAssignedValueOfVariable() &&
+                                vars.stream().anyMatch(var -> var.getGuid().equals(UUID.fromString(fact.getAssignedValue())))) ||
+                        rule.getConclusions().stream().anyMatch(fact ->
+                                vars.contains(fact.getVariable()) || fact.isAssignedValueOfVariable() &&
+                                        vars.stream().anyMatch(var -> var.getGuid().equals(UUID.fromString(fact.getAssignedValue()))))
+                );
     }
 
     private void removeRule() {
-
+        int idx = rulesTableView.getSelectionModel().getSelectedIndex();
+        rulesTableView.getItems().remove(idx);
+        expertSystem.getKnowledgeBase().getRules().remove(idx);
     }
 
     private void removeVariable() {
+        int idx = variablesTableView.getSelectionModel().getSelectedIndex();
+        variablesTableView.getItems().remove(idx);
+        var kb = expertSystem.getKnowledgeBase();
+        var uuid = kb.getVariables().get(idx).getGuid();
+        expertSystem.getKnowledgeBase().getVariables().remove(idx);
+        kb.getRules().removeIf(rule ->
+                rule.getPremises().stream().anyMatch(fact -> fact.getVariable().getGuid().equals(uuid)
+                        || fact.isAssignedValueOfVariable() && uuid.equals(UUID.fromString(fact.getAssignedValue()))) ||
+                        rule.getConclusions().stream().anyMatch(fact ->
+                                fact.getVariable().getGuid().equals(uuid) || fact.isAssignedValueOfVariable() &&
+                                        uuid.equals(UUID.fromString(fact.getAssignedValue())))
+        );
+    }
 
+    private void ruleTableViewSelectionChanged(ObservableValue<? extends Number> observableValue, Number oldIndex,
+        Number newIndex) {
+        boolean disable = newIndex.intValue() == -1;
+        changeSpecificActionsState(disable);
     }
 
     private void saveKb() {
@@ -210,8 +335,8 @@ public class ExpertShellController {
 
     private void saveKbAs() {
         File newKbFile = generateFileChooser(resources.getString("saveKbAs"),
-                Arrays.asList(resources.getString("fileExtDescr")),
-                Arrays.asList(kbExporter.getFileExtension()))
+                Collections.singletonList(resources.getString("fileExtDescr")),
+                Collections.singletonList(kbExporter.getFileExtension()))
                 .showSaveDialog(stage);
         if (newKbFile != null) {
             kbFile = newKbFile;
@@ -274,18 +399,56 @@ public class ExpertShellController {
         alert.showAndWait();
     }
 
+    private void tabChanged(ObservableValue<? extends Tab> observableValue, Tab oldTab, Tab newTab) {
+        String viewedEntity = "";
+        domainsTableView.getSelectionModel().clearSelection();
+        variablesTableView.getSelectionModel().clearSelection();
+        rulesTableView.getSelectionModel().clearSelection();
+
+        if (newTab == domainsTab)
+            viewedEntity = "Domain";
+        else
+        if (newTab == rulesTab)
+            viewedEntity = "Rule";
+        else
+            viewedEntity = "Variable";
+        setActions(viewedEntity);
+
+        addTool.getTooltip().setText(resources.getString(String.format("add%s", viewedEntity)));
+        editMenuItem.setText(resources.getString(String.format("edit%s", viewedEntity)));
+        editTool.getTooltip().setText(resources.getString(String.format("edit%s", viewedEntity)));
+        removeMenuItem.setText(resources.getString(String.format("remove%s", viewedEntity)));
+        removeTool.getTooltip().setText(resources.getString(String.format("remove%s", viewedEntity)));
+    }
+
     private void updateTitle() {
         stage.setTitle(String.format("%s. %s", resources.getString("title"),
                 expertSystem.kbIsLoaded() ?
                 String.format("%s: %s.", resources.getString("kb"), expertSystem.getKnowledgeBase().getName()) :
                         resources.getString("noKb")));
     }
+
+    private void variableTableViewSelectionChanged(ObservableValue<? extends Variable> observableValue, Variable oldVal,
+                                                   Variable newVal) {
+        boolean disable = newVal == null;
+        changeSpecificActionsState(disable);
+        if (disable){
+            variableLabelTextField.setText("");
+            variableDomainTextField.setText("");
+            variableAttributionTextField.setText("");
+            variableQuestionTextArea.setText("");
+        }
+        else {
+            variableLabelTextField.setText(newVal.getLabel());
+            variableDomainTextField.setText(newVal.getDomain().getName());
+            variableAttributionTextField.setText(types.get(newVal.getVarClass()));
+            variableQuestionTextArea.setText(newVal.getQuestion());
+        }
+    }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Элементы управления">
     @FXML
     private ResourceBundle resources;
-    @FXML
-    private URL location;
     @FXML
     private MenuBar mainMenuBar;
     @FXML
@@ -365,7 +528,7 @@ public class ExpertShellController {
     @FXML
     private TableView<Domain> domainsTableView;
     @FXML
-    private ListView<?> domainValuesListView;
+    private ListView<Value> domainValuesListView;
     @FXML
     private Tab variablesTab;
     @FXML
@@ -377,7 +540,7 @@ public class ExpertShellController {
     @FXML
     private TableColumn<Variable, Domain> variableDomainColumn;
     @FXML
-    private TableColumn<Variable, String> variableTypeColumn;
+    private TextField variableLabelTextField;
     @FXML
     private TextField variableDomainTextField;
     @FXML
@@ -444,22 +607,127 @@ public class ExpertShellController {
     void saveKbTool_OnAction(ActionEvent event) { saveKb(); }
     @FXML
     void setGoalMenuItem_OnAction(ActionEvent event) { setGoal(); }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Инициализация">
+    @FXML
+    void initialize() {
+        assert mainMenuBar != null : "fx:id=\"mainMenuBar\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert knowledgeBaseMenu != null : "fx:id=\"knowledgeBaseMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert newKbMenuItem != null : "fx:id=\"newKbMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert openKbMenuItem != null : "fx:id=\"openKbMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert saveKbMenuItem != null : "fx:id=\"saveKbMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert saveKbAsMenuItem != null : "fx:id=\"saveKbAsMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert closeKbMenuItem != null : "fx:id=\"closeKbMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert quitMenuItem != null : "fx:id=\"quitMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert editMenu != null : "fx:id=\"editMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert addDomainMenuItem != null : "fx:id=\"addDomainMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert addVariableMenuItem != null : "fx:id=\"addVariableMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert addRuleMenuItem != null : "fx:id=\"addRuleMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert editMenuItem != null : "fx:id=\"editMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert removeMenuItem != null : "fx:id=\"removeMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert consultMenu != null : "fx:id=\"consultMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert setGoalMenuItem != null : "fx:id=\"setGoalMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert consultMenuItem != null : "fx:id=\"consultMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert forgetMenuItem != null : "fx:id=\"forgetMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert reasoningMenu != null : "fx:id=\"reasoningMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert reasoningMenuItem != null : "fx:id=\"reasoningMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert helpMenu != null : "fx:id=\"helpMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert helpMenuItem != null : "fx:id=\"helpMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert aboutMenuItem != null : "fx:id=\"aboutMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert mainToolBar != null : "fx:id=\"mainToolBar\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert newKbTool != null : "fx:id=\"newKbTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert openKbTool != null : "fx:id=\"openKbTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert saveKbTool != null : "fx:id=\"saveKbTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert closeKbTool != null : "fx:id=\"closeKbTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert addTool != null : "fx:id=\"addTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert editTool != null : "fx:id=\"editTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert removeTool != null : "fx:id=\"removeTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert consultTool != null : "fx:id=\"consultTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert reasoningTool != null : "fx:id=\"reasoningTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert helpTool != null : "fx:id=\"helpTool\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert mainTabPane != null : "fx:id=\"mainTabPane\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert domainsTab != null : "fx:id=\"domainsTab\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert domainsTableView != null : "fx:id=\"domainsTableView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert domainNameColumn != null : "fx:id=\"domainNameColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert domainTypeColumn != null : "fx:id=\"domainTypeColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert domainValuesListView != null : "fx:id=\"domainValuesListView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variablesTab != null : "fx:id=\"variablesTab\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variablesTableView != null : "fx:id=\"variablesTableView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variableNameColumn != null : "fx:id=\"variableNameColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variableAttributionColumn != null : "fx:id=\"variableAttributionColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variableDomainColumn != null : "fx:id=\"variableDomainColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variableDomainTextField != null : "fx:id=\"variableDomainTextField\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variableAttributionTextField != null : "fx:id=\"variableAttributionTextField\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert variableQuestionTextArea != null : "fx:id=\"variableQuestionTextArea\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert rulesTab != null : "fx:id=\"rulesTab\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert rulesTableView != null : "fx:id=\"rulesTableView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert ruleNameColumn != null : "fx:id=\"ruleNameColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert ruleContentColumn != null : "fx:id=\"ruleContentColumn\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert rulePremisesListView != null : "fx:id=\"rulePremisesListView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert ruleConclusionsListView != null : "fx:id=\"ruleConclusionsListView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert ruleCommentTextArea != null : "fx:id=\"ruleCommentTextArea\" was not injected: check your FXML file 'expertshellgui.fxml'.";
 
-    private void tabChanged(ObservableValue<? extends Tab> observableValue, Tab oldTab, Tab newTab) {
-        String viewedEntity = "";
-        if (newTab == domainsTab)
-            viewedEntity = "Domain";
-        else
-        if (newTab == rulesTab)
-            viewedEntity = "Rule";
-        else
-            viewedEntity = "Variable";
-        setActions(viewedEntity);
-        addTool.getTooltip().setText(resources.getString(String.format("add%s", viewedEntity)));
-        editMenuItem.setText(resources.getString(String.format("edit%s", viewedEntity)));
-        editTool.getTooltip().setText(resources.getString(String.format("edit%s", viewedEntity)));
-        removeMenuItem.setText(resources.getString(String.format("remove%s", viewedEntity)));
-        removeTool.getTooltip().setText(resources.getString(String.format("remove%s", viewedEntity)));
+        mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
+        domainsTableView.getSelectionModel().selectedIndexProperty().addListener(this::domainTableViewSelectionChanged);
+        rulesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
+        variablesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
+
+        domainNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        domainTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        domainValuesListView.setCellFactory(new Callback<ListView<Value>, ListCell<Value>>() {
+            @Override
+            public ListCell<Value> call(ListView<Value> valueListView) {
+                return new ListCell<>() {
+                    @Override
+                    protected void updateItem(Value item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty)
+                            setGraphic(null);
+                        else
+                            setText(item.getContent());
+                    }
+                };
+            }
+        });
+
+        variablesTableView.getSelectionModel().selectedItemProperty().addListener(this::variableTableViewSelectionChanged);
+        variableNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        variableAttributionColumn.setCellValueFactory(new PropertyValueFactory<>("varClass"));
+        variableAttributionColumn.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Variable, Classes> call(TableColumn<Variable, Classes> variableClassesTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(Classes item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null) {
+                            super.setText(null);
+                        } else {
+                            super.setText(types.get(item));
+                        }
+                    }
+                };
+            }
+        });
+        variableDomainColumn.setCellValueFactory(new PropertyValueFactory<>("domain"));
+        variableDomainColumn.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Variable, Domain> call(TableColumn<Variable, Domain> variableDomainTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(Domain item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null)
+                            super.setText(null);
+                        else
+                            super.setText(item.getName());
+                    }
+                };
+            }
+        });
+
+        addImage = new Image("/icons/newItem.png");
+        editImage = new Image("/icons/editItem.png");
     }
     //</editor-fold>
 }
