@@ -1,10 +1,11 @@
 package base.environmentvars;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnvironmentVariablesSet {
+public class EnvironmentVariablesSet implements Serializable {
     private boolean auto;
     private Color bacg;
     private boolean bell;

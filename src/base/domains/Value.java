@@ -1,8 +1,9 @@
 package base.domains;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Value {
+public class Value implements Serializable {
     private UUID guid;
     private String content;
 

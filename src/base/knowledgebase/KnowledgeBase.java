@@ -5,10 +5,11 @@ import base.rules.Rule;
 import base.environmentvars.EnvironmentVariablesSet;
 import base.variables.Variable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KnowledgeBase {
+public class KnowledgeBase implements Serializable {
     private String name;
 
     private Variable goal;

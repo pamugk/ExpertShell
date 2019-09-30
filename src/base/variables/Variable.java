@@ -5,9 +5,10 @@ import base.environmentvars.CFVA;
 import base.environmentvars.WHN;
 import base.environmentvars.RIGR;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Variable {
+public class Variable implements Serializable {
     private UUID guid;
     private Domain domain;
     private Classes varClass;
@@ -55,12 +56,9 @@ public class Variable {
     public void setLimit(int limit) { this.limit = limit; }
     public RIGR getRigor() { return rigor; }
     public void setRigor(RIGR rigor) { this.rigor = rigor; }
+    public String getQuestion() { return question; }
+    public void setQuestion(String question) { this.question = question; }
 
-    public String getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
-    }
+    @Override
+    public String toString() {  return name; }
 }
