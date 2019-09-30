@@ -45,11 +45,10 @@ public class DomainDialogController {
     private void close() { ((Stage)okButton.getScene().getWindow()).close(); }
 
     private void disableOkButton(String newName) {
-        boolean disable = domain == null || kb == null || newName.trim().equals("")
+        okButton.setDisable(newName == null || newName.trim().equals("")
                 || kb.getUsedDomains().stream().anyMatch(someDomain ->
-                        !someDomain.getGuid().equals(domain.getGuid()) && someDomain.getName().equals(domain.getName()))
-                || valuesListView.getItems().size() == 0;
-        okButton.setDisable(disable);
+                !someDomain.getGuid().equals(domain.getGuid()) && someDomain.getName().equals(domain.getName()))
+                || valuesListView.getItems().size() == 0);
     }
 
     private Domain getDomain() { return domain; }
@@ -120,13 +119,14 @@ public class DomainDialogController {
             if (currentIdx == -1)
                 valuesListView.getItems().add(newValue);
             else
-                valuesListView.getItems().add(currentIdx, newValue);
+                valuesListView.getItems().add(currentIdx+1, newValue);
             disableOkButton(nameTextField.getText());
         }
     }
 
     @FXML
     void cancelButton_OnAction(ActionEvent event) {
+        domain = null;
         close();
     }
 
@@ -136,6 +136,7 @@ public class DomainDialogController {
         var editedValue = valuesListView.getItems().get(idx);
         if (showValueDialog(editedValue, resources.getString("newValue"), resources.getString("newValue")))
             valuesListView.getItems().set(idx, editedValue);
+        disableOkButton(nameTextField.getText());
     }
 
     @FXML
@@ -149,6 +150,7 @@ public class DomainDialogController {
     @FXML
     void removeButton_OnAction(ActionEvent event) {
         valuesListView.getItems().remove(valuesListView.getSelectionModel().getSelectedIndex());
+        disableOkButton(nameTextField.getText());
     }
 
     @FXML

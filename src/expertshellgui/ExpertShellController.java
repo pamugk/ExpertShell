@@ -68,6 +68,8 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
+        if (newDomain == null)
+            return;
         tableViewSmartInsert(domainsTableView, expertSystem.getKnowledgeBase().getUsedDomains(), newDomain);
     }
 
@@ -81,7 +83,10 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
+        if (newRule == null)
+            return;
         tableViewSmartInsert(rulesTableView, expertSystem.getKnowledgeBase().getRules(), newRule);
+        updateTablesAfterRule();
     }
 
     private void addVariable() {
@@ -95,6 +100,8 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
+        if (newVariable == null)
+            return;
         expertSystem.getKnowledgeBase().getUsedDomains().forEach(domain -> {
             if (!domainsTableView.getItems().contains(domain))
                 domainsTableView.getItems().add(domain);
@@ -175,7 +182,10 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
+        if (editedDomain == null)
+            return;
         domainsTableView.getItems().set(idx, editedDomain);
+        domainTableViewSelectionChanged(null, null, idx);
     }
 
     private void editRule() {
@@ -190,7 +200,11 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
+        if (editedRule == null)
+            return;
         rulesTableView.getItems().set(idx, editedRule);
+        updateTablesAfterRule();
+        ruleTableViewSelectionChanged(null, null, idx);
     }
 
     private void editVariable() {
@@ -206,11 +220,14 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
+        if (editedVariable == null)
+            return;
         expertSystem.getKnowledgeBase().getUsedDomains().forEach(domain -> {
             if (!domainsTableView.getItems().contains(domain))
                 domainsTableView.getItems().add(domain);
         });
         variablesTableView.getItems().set(idx, editedVariable);
+        variableTableViewSelectionChanged(null, null, editedVariable);
     }
 
     private void forget() {
@@ -236,6 +253,14 @@ public class ExpertShellController {
                 e.printStackTrace();
             }
         };
+    }
+
+    private void fillGUI() {
+        if (!expertSystem.kbIsLoaded())
+            return;
+        domainsTableView.getItems().addAll(expertSystem.getKnowledgeBase().getUsedDomains());
+        variablesTableView.getItems().addAll(expertSystem.getKnowledgeBase().getVariables());
+        rulesTableView.getItems().addAll(expertSystem.getKnowledgeBase().getRules());
     }
 
     public void initialise() {
@@ -273,6 +298,7 @@ public class ExpertShellController {
                 return;
             }
             expertSystem.setKnowledgeBase(loadedBase);
+            fillGUI();
         }
         changeInterfaceState();
         updateTitle();
@@ -380,7 +406,7 @@ public class ExpertShellController {
     }
 
     private void setGoal() {
-
+        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
     }
 
     private void showAbout() {
@@ -441,9 +467,16 @@ public class ExpertShellController {
             tableView.getItems().add(newItem);
         }
         else{
-            kbCollection.add(currentIdx, newItem);
-            tableView.getItems().add(currentIdx, newItem);
+            kbCollection.add(currentIdx+1, newItem);
+            tableView.getItems().add(currentIdx+1, newItem);
         }
+    }
+
+    private void updateTablesAfterRule() {
+        domainsTableView.getItems().clear();
+        domainsTableView.getItems().addAll(expertSystem.getKnowledgeBase().getUsedDomains());
+        variablesTableView.getItems().clear();
+        variablesTableView.getItems().addAll(expertSystem.getKnowledgeBase().getVariables());
     }
 
     private void updateTitle() {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import base.domains.Domain;
 import base.knowledgebase.KnowledgeBase;
 import base.rules.Fact;
 import base.rules.Rule;
@@ -145,6 +144,7 @@ public class RuleDialogController {
 
     @FXML
     void cancelButton_OnAction(ActionEvent event) {
+        rule = null;
         close();
     }
 

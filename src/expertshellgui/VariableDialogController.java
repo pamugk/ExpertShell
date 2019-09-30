@@ -80,21 +80,18 @@ public class VariableDialogController {
     //<editor-fold defaultstate="collapsed" desc="Элементы управления">
     @FXML
     private ResourceBundle resources;
-
     @FXML
     private TextField nameTextField;
-
     @FXML
     private TextField labelTextField;
-
     @FXML
     private ComboBox<Classes> typeComboBox;
-
     @FXML
     private Button addButton;
-
     @FXML
     private ComboBox<Domain> domainComboBox;
+    @FXML
+    private CheckBox autoQuestionChkbox;
     @FXML
     private TextArea questionTextArea;
     @FXML
@@ -122,6 +119,7 @@ public class VariableDialogController {
 
     @FXML
     void cancelButton_OnAction(ActionEvent event) {
+        variable = null;
         close();
     }
 
@@ -152,8 +150,12 @@ public class VariableDialogController {
         typeComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
                 disableOkButton(nameTextField.getText(), questionTextArea.getText());
                 boolean disableQuestion = newValue == Classes.DEDUCTED;
+                autoQuestionChkbox.setDisable(disableQuestion);
                 if (disableQuestion)
                     questionTextArea.clear();
+                else
+                    if (oldValue == Classes.DEDUCTED)
+                        autoQuestionChkbox.setSelected(true);
                 questionTextArea.setDisable(disableQuestion);
         });
         typeComboBox.setCellFactory(new Callback<>() {
@@ -187,6 +189,11 @@ public class VariableDialogController {
                     }
                 };
             }
+        });
+        autoQuestionChkbox.selectedProperty().addListener((observableValue, wasChecked, nowChecked) -> {
+            questionTextArea.setDisable(nowChecked);
+            if (questionTextArea.getText().isEmpty())
+                questionTextArea.setText(String.format("%s?", nameTextField.getText()));
         });
         questionTextArea.textProperty().addListener((observableValue, oldValue, newValue) ->
                 disableOkButton(nameTextField.getText(), newValue));
