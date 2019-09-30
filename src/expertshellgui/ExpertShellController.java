@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,19 +68,20 @@ public class ExpertShellController {
             e.printStackTrace();
             return;
         }
-        var currentIdx = domainsTableView.getSelectionModel().getSelectedIndex();
-        if (currentIdx == -1) {
-            expertSystem.getKnowledgeBase().getUsedDomains().add(newDomain);
-            domainsTableView.getItems().add(newDomain);
-        }
-        else{
-            expertSystem.getKnowledgeBase().getUsedDomains().add(currentIdx, newDomain);
-            domainsTableView.getItems().add(currentIdx, newDomain);
-        }
+        tableViewSmartInsert(domainsTableView, expertSystem.getKnowledgeBase().getUsedDomains(), newDomain);
     }
 
     private void addRule() {
-
+        Rule newRule;
+        try {
+            newRule = RuleDialogController.showAndWait(new Rule(UUID.randomUUID(),
+                            resources.getString("newRule")), resources.getString("addRule"),
+                    addImage, expertSystem.getKnowledgeBase(), resources);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        tableViewSmartInsert(rulesTableView, expertSystem.getKnowledgeBase().getRules(), newRule);
     }
 
     private void addVariable() {
@@ -89,8 +89,8 @@ public class ExpertShellController {
         try {
             newVariable = VariableDialogController.showAndWait(new Variable(UUID.randomUUID(),
                             resources.getString("newVariable"), null, Classes.REQUESTED),
-                    resources.getString("addVariable"),
-                    addImage, expertSystem.getKnowledgeBase(), resources);
+                    resources.getString("addVariable"), addImage, expertSystem.getKnowledgeBase(), resources,
+                    Arrays.stream(Classes.values()).collect(Collectors.toList()));
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -99,15 +99,7 @@ public class ExpertShellController {
             if (!domainsTableView.getItems().contains(domain))
                 domainsTableView.getItems().add(domain);
         });
-        var currentIdx = domainsTableView.getSelectionModel().getSelectedIndex();
-        if (currentIdx == -1) {
-            expertSystem.getKnowledgeBase().getVariables().add(newVariable);
-            variablesTableView.getItems().add(newVariable);
-        }
-        else{
-            expertSystem.getKnowledgeBase().getVariables().add(currentIdx, newVariable);
-            variablesTableView.getItems().add(currentIdx, newVariable);
-        }
+        tableViewSmartInsert(variablesTableView, expertSystem.getKnowledgeBase().getVariables(), newVariable);
     }
 
     private Optional<String> askKbName(String title, String header, String currentName) {
@@ -148,7 +140,7 @@ public class ExpertShellController {
     }
 
     private void consult() {
-
+        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
     }
 
     private void closeKb() {
@@ -187,7 +179,18 @@ public class ExpertShellController {
     }
 
     private void editRule() {
-
+        int idx = rulesTableView.getSelectionModel().getSelectedIndex();
+        Rule editedRule;
+        try {
+            editedRule = RuleDialogController.showAndWait(
+                    rulesTableView.getItems().get(idx), resources.getString("editRule"),
+                    editImage, expertSystem.getKnowledgeBase(), resources
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        rulesTableView.getItems().set(idx, editedRule);
     }
 
     private void editVariable() {
@@ -196,7 +199,8 @@ public class ExpertShellController {
         try {
             editedVariable = VariableDialogController.showAndWait(
                     variablesTableView.getItems().get(idx), resources.getString("editVariable"),
-                    editImage, expertSystem.getKnowledgeBase(), resources
+                    editImage, expertSystem.getKnowledgeBase(), resources,
+                    Arrays.stream(Classes.values()).collect(Collectors.toList())
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -210,7 +214,7 @@ public class ExpertShellController {
     }
 
     private void forget() {
-
+        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
     }
 
     private FileChooser generateFileChooser(String title, List<String> fileExtDescrs, List<String> fileExts) {
@@ -261,9 +265,14 @@ public class ExpertShellController {
                         .showOpenDialog(stage);
         if (newKbFile != null) {
             kbFile = newKbFile;
-            KnowledgeBase loadedBase = kbImporter.importKnowledgeBase(kbFile);
-            if (loadedBase != null)
-                expertSystem.setKnowledgeBase(loadedBase);
+            KnowledgeBase loadedBase;
+            try {
+                loadedBase = kbImporter.importKnowledgeBase(kbFile);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
+            expertSystem.setKnowledgeBase(loadedBase);
         }
         changeInterfaceState();
         updateTitle();
@@ -276,7 +285,7 @@ public class ExpertShellController {
     }
 
     private void reasoning() {
-
+        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
     }
 
     private void removeDomain() {
@@ -291,10 +300,10 @@ public class ExpertShellController {
         kb.getRules().removeIf(rule ->
                 rule.getPremises().stream().anyMatch(fact ->
                         vars.contains(fact.getVariable()) || fact.isAssignedValueOfVariable() &&
-                                vars.stream().anyMatch(var -> var.getGuid().equals(UUID.fromString(fact.getAssignedValue())))) ||
+                                vars.stream().anyMatch(var -> var.getGuid().equals(fact.getAssignedVariable().getGuid()))) ||
                         rule.getConclusions().stream().anyMatch(fact ->
                                 vars.contains(fact.getVariable()) || fact.isAssignedValueOfVariable() &&
-                                        vars.stream().anyMatch(var -> var.getGuid().equals(UUID.fromString(fact.getAssignedValue()))))
+                                vars.stream().anyMatch(var -> var.getGuid().equals(fact.getAssignedVariable().getGuid())))
                 );
     }
 
@@ -312,10 +321,10 @@ public class ExpertShellController {
         expertSystem.getKnowledgeBase().getVariables().remove(idx);
         kb.getRules().removeIf(rule ->
                 rule.getPremises().stream().anyMatch(fact -> fact.getVariable().getGuid().equals(uuid)
-                        || fact.isAssignedValueOfVariable() && uuid.equals(UUID.fromString(fact.getAssignedValue()))) ||
+                        || fact.isAssignedValueOfVariable() && uuid.equals(fact.getAssignedVariable().getGuid())) ||
                         rule.getConclusions().stream().anyMatch(fact ->
                                 fact.getVariable().getGuid().equals(uuid) || fact.isAssignedValueOfVariable() &&
-                                        uuid.equals(UUID.fromString(fact.getAssignedValue())))
+                                        uuid.equals(fact.getAssignedVariable().getGuid()))
         );
     }
 
@@ -330,7 +339,11 @@ public class ExpertShellController {
             saveKbAs();
             return;
         }
-        kbExporter.exportKnowledgeBase(kbFile, expertSystem.getKnowledgeBase());
+        try {
+            kbExporter.exportKnowledgeBase(kbFile, expertSystem.getKnowledgeBase());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void saveKbAs() {
@@ -400,11 +413,11 @@ public class ExpertShellController {
     }
 
     private void tabChanged(ObservableValue<? extends Tab> observableValue, Tab oldTab, Tab newTab) {
-        String viewedEntity = "";
         domainsTableView.getSelectionModel().clearSelection();
         variablesTableView.getSelectionModel().clearSelection();
         rulesTableView.getSelectionModel().clearSelection();
 
+        String viewedEntity;
         if (newTab == domainsTab)
             viewedEntity = "Domain";
         else
@@ -419,6 +432,18 @@ public class ExpertShellController {
         editTool.getTooltip().setText(resources.getString(String.format("edit%s", viewedEntity)));
         removeMenuItem.setText(resources.getString(String.format("remove%s", viewedEntity)));
         removeTool.getTooltip().setText(resources.getString(String.format("remove%s", viewedEntity)));
+    }
+
+    private <T> void tableViewSmartInsert(TableView<T> tableView, List<T> kbCollection, T newItem) {
+        var currentIdx = tableView.getSelectionModel().getSelectedIndex();
+        if (currentIdx == -1) {
+            kbCollection.add(newItem);
+            tableView.getItems().add(newItem);
+        }
+        else{
+            kbCollection.add(currentIdx, newItem);
+            tableView.getItems().add(currentIdx, newItem);
+        }
     }
 
     private void updateTitle() {
@@ -674,7 +699,7 @@ public class ExpertShellController {
 
         domainNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         domainTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        domainValuesListView.setCellFactory(new Callback<ListView<Value>, ListCell<Value>>() {
+        domainValuesListView.setCellFactory(new Callback<>() {
             @Override
             public ListCell<Value> call(ListView<Value> valueListView) {
                 return new ListCell<>() {

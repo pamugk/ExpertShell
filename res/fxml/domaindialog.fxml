@@ -17,7 +17,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expertshellgui.DomainDialogController">
     <VBox layoutX="92.0" layoutY="71.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <Label fx:id="nameLabel" text="%name" VBox.vgrow="ALWAYS" />
+        <Label fx:id="nameLabel" text="%domainName" VBox.vgrow="ALWAYS" />
         <TextField fx:id="nameTextField" promptText="%namePrompt" />
         <GridPane>
             <columnConstraints>

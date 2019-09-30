@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.UUID;
@@ -28,8 +29,9 @@ public class VariableDialogController {
     private Map<Classes, String> types;
     private Image addImage;
 
-    static Variable showAndWait(Variable oldVariable, String title, Image icon,
-                                KnowledgeBase kb, ResourceBundle resources) throws IOException {
+    //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
+    static Variable showAndWait(Variable oldVariable, String title, Image icon, KnowledgeBase kb,
+                                ResourceBundle resources, List<Classes> allowedClasses) throws IOException {
         FXMLLoader loader = new FXMLLoader(DomainDialogController.class.getResource("/fxml/variabledialog.fxml"),
                 resources);
         Parent dialogRoot = loader.load();
@@ -39,12 +41,10 @@ public class VariableDialogController {
         dialogStage.getIcons().add(icon);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
-        dialog.setup(oldVariable, kb);
+        dialog.setup(oldVariable, kb, allowedClasses);
         dialogStage.showAndWait();
         return dialog.getVariable();
     }
-
-    //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private void close() { ((Stage)okButton.getScene().getWindow()).close(); }
 
     private void disableOkButton(String name, String question) {
@@ -59,9 +59,10 @@ public class VariableDialogController {
 
     private Variable getVariable() { return variable; }
 
-    private void setup(Variable oldVariable, KnowledgeBase kb) {
+    private void setup(Variable oldVariable, KnowledgeBase kb, List<Classes> allowedClasses) {
         this.variable = oldVariable;
         this.kb = kb;
+        typeComboBox.getItems().addAll(allowedClasses);
         nameTextField.setText(oldVariable.getName());
         labelTextField.setText(oldVariable.getLabel());
         typeComboBox.getSelectionModel().select(oldVariable.getVarClass());
@@ -115,7 +116,6 @@ public class VariableDialogController {
         }
         if (newDomain == null)
             return;
-        kb.getUsedDomains().add(newDomain);
         domainComboBox.getItems().add(newDomain);
         domainComboBox.getSelectionModel().selectLast();
     }
@@ -132,6 +132,8 @@ public class VariableDialogController {
         variable.setVarClass(typeComboBox.getValue());
         variable.setDomain(domainComboBox.getValue());
         variable.setQuestion(questionTextArea.getText());
+        kb.getUsedDomains().clear();
+        kb.getUsedDomains().addAll(domainComboBox.getItems());
         close();
     }
     //</editor-fold>
@@ -147,7 +149,6 @@ public class VariableDialogController {
         assert cancelButton != null : "fx:id=\"cancelButton\" was not injected: check your FXML file 'variabledialog.fxml'.";
         nameTextField.textProperty().addListener((observableValue, oldName, newName) -> disableOkButton(newName,
                 questionTextArea.getText()));
-        typeComboBox.getItems().addAll(Classes.values());
         typeComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
                 disableOkButton(nameTextField.getText(), questionTextArea.getText());
                 boolean disableQuestion = newValue == Classes.DEDUCTED;

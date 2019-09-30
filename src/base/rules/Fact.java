@@ -1,13 +1,15 @@
 package base.rules;
 
+import base.domains.Value;
 import base.variables.Variable;
 
 import java.io.Serializable;
 
 public class Fact implements Serializable {
     private Variable variable;
-    private String assignedValue;
+    private Value assignedValue;
     private boolean assignedValueOfVariable;
+    private Variable assignedVariable;
 
     public Variable getVariable() {
         return variable;
@@ -15,11 +17,17 @@ public class Fact implements Serializable {
     public void setVariable(Variable variable) {
         this.variable = variable;
     }
-    public String getAssignedValue() {
+    public Value getAssignedValue() {
         return assignedValue;
     }
-    public void setAssignedValue(String assignedValue) {
+    public void setAssignedValue(Value assignedValue) {
         this.assignedValue = assignedValue;
+    }
+    public Variable getAssignedVariable() {
+        return assignedVariable;
+    }
+    public void setAssignedVariable(Variable assignedVariable) {
+        this.assignedVariable = assignedVariable;
     }
     public boolean isAssignedValueOfVariable() {
         return assignedValueOfVariable;
