@@ -5,7 +5,7 @@ import base.domains.Value;
 import base.knowledgebase.KnowledgeBase;
 import base.rules.Fact;
 import base.rules.Rule;
-import base.variables.Classes;
+import base.variables.Types;
 import base.variables.Variable;
 import expertsystem.ExpertSystem;
 import javafx.beans.binding.Bindings;
@@ -21,7 +21,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.jetbrains.annotations.NotNull;
 import transfer.interfaces.KnowledgeBaseExporter;
 import transfer.interfaces.KnowledgeBaseImporter;
 
@@ -37,7 +36,7 @@ import static java.util.Map.entry;
 public class ExpertShellController {
     private Image addImage;
     private Image editImage;
-    private Map<Classes, String> types;
+    private Map<Types, String> types;
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private ExpertSystem expertSystem;
     private KnowledgeBaseExporter kbExporter;
@@ -93,9 +92,9 @@ public class ExpertShellController {
         Variable newVariable;
         try {
             newVariable = VariableDialogController.showAndWait(new Variable(UUID.randomUUID(),
-                            resources.getString("newVariable"), null, Classes.REQUESTED),
+                            resources.getString("newVariable"), null, Types.REQUESTED),
                     resources.getString("addVariable"), addImage, expertSystem.getKnowledgeBase(), resources,
-                    Arrays.stream(Classes.values()).collect(Collectors.toList()));
+                    Arrays.stream(Types.values()).collect(Collectors.toList()));
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -134,6 +133,8 @@ public class ExpertShellController {
         addVariableMenuItem.setDisable(disable);
         addTool.setDisable(disable);
 
+        setGoalMenuItem.setDisable(disable);
+
         domainsTableView.setDisable(disable);
         rulesTableView.setDisable(disable);
         variablesTableView.setDisable(disable);
@@ -147,7 +148,7 @@ public class ExpertShellController {
     }
 
     private void consult() {
-        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
+        showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
     }
 
     private void closeKb() {
@@ -214,7 +215,7 @@ public class ExpertShellController {
             editedVariable = VariableDialogController.showAndWait(
                     variablesTableView.getItems().get(idx), resources.getString("editVariable"),
                     editImage, expertSystem.getKnowledgeBase(), resources,
-                    Arrays.stream(Classes.values()).collect(Collectors.toList())
+                    Arrays.stream(Types.values()).collect(Collectors.toList())
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -231,7 +232,7 @@ public class ExpertShellController {
     }
 
     private void forget() {
-        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
+        showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
     }
 
     private FileChooser generateFileChooser(String title, List<String> fileExtDescrs, List<String> fileExts) {
@@ -243,7 +244,6 @@ public class ExpertShellController {
         return kbChooser;
     }
 
-    @NotNull
     private EventHandler<ActionEvent> generateHandler(String handlerName) throws NoSuchMethodException {
         Method handlerMethod = this.getClass().getDeclaredMethod(handlerName);
         return actionEvent -> {
@@ -267,10 +267,10 @@ public class ExpertShellController {
         tabChanged(null, null, mainTabPane.getSelectionModel().getSelectedItem());
         updateTitle();
         types = Map.ofEntries(
-                entry(Classes.REQUESTED, resources.getString("varReq")),
-                entry(Classes.DEDUCTED, resources.getString("varDed")),
-                entry(Classes.REQUESTED_DEDUCTED, resources.getString("varRD")),
-                entry(Classes.DEDUCTED_REQUESTED, resources.getString("varDR"))
+                entry(Types.REQUESTED, resources.getString("varReq")),
+                entry(Types.DEDUCTED, resources.getString("varDed")),
+                entry(Types.REQUESTED_DEDUCTED, resources.getString("varRD")),
+                entry(Types.DEDUCTED_REQUESTED, resources.getString("varDR"))
         );
     }
 
@@ -311,7 +311,7 @@ public class ExpertShellController {
     }
 
     private void reasoning() {
-        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
+        showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
     }
 
     private void removeDomain() {
@@ -325,11 +325,11 @@ public class ExpertShellController {
         kb.getVariables().removeAll(vars);
         kb.getRules().removeIf(rule ->
                 rule.getPremises().stream().anyMatch(fact ->
-                        vars.contains(fact.getVariable()) || fact.isAssignedValueOfVariable() &&
-                                vars.stream().anyMatch(var -> var.getGuid().equals(fact.getAssignedVariable().getGuid()))) ||
+                        vars.contains(fact.getVariable()) || fact.getAssignable() instanceof Variable &&
+                                vars.stream().anyMatch(var -> var.getGuid().equals((fact.getAssignable()).getGuid()))) ||
                         rule.getConclusions().stream().anyMatch(fact ->
-                                vars.contains(fact.getVariable()) || fact.isAssignedValueOfVariable() &&
-                                vars.stream().anyMatch(var -> var.getGuid().equals(fact.getAssignedVariable().getGuid())))
+                                vars.contains(fact.getVariable()) || fact.getAssignable() instanceof Variable &&
+                                vars.stream().anyMatch(var -> var.getGuid().equals(fact.getAssignable().getGuid())))
                 );
     }
 
@@ -347,10 +347,10 @@ public class ExpertShellController {
         expertSystem.getKnowledgeBase().getVariables().remove(idx);
         kb.getRules().removeIf(rule ->
                 rule.getPremises().stream().anyMatch(fact -> fact.getVariable().getGuid().equals(uuid)
-                        || fact.isAssignedValueOfVariable() && uuid.equals(fact.getAssignedVariable().getGuid())) ||
+                        || fact.getAssignable() instanceof Variable && uuid.equals(fact.getAssignable().getGuid())) ||
                         rule.getConclusions().stream().anyMatch(fact ->
-                                fact.getVariable().getGuid().equals(uuid) || fact.isAssignedValueOfVariable() &&
-                                        uuid.equals(fact.getAssignedVariable().getGuid()))
+                                fact.getVariable().getGuid().equals(uuid) || fact.getAssignable() instanceof Variable &&
+                                        uuid.equals(fact.getAssignable().getGuid()))
         );
     }
 
@@ -406,7 +406,7 @@ public class ExpertShellController {
     }
 
     private void setGoal() {
-        showMessage(resources.getString("oopsTitle"), "oopsMessage", Alert.AlertType.WARNING);
+        showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
     }
 
     private void showAbout() {
@@ -490,6 +490,7 @@ public class ExpertShellController {
                                                    Variable newVal) {
         boolean disable = newVal == null;
         changeSpecificActionsState(disable);
+        varDomainValuesListView.getItems().clear();
         if (disable){
             variableLabelTextField.setText("");
             variableDomainTextField.setText("");
@@ -501,6 +502,7 @@ public class ExpertShellController {
             variableDomainTextField.setText(newVal.getDomain().getName());
             variableAttributionTextField.setText(types.get(newVal.getVarClass()));
             variableQuestionTextArea.setText(newVal.getQuestion());
+            varDomainValuesListView.getItems().addAll(newVal.getDomain().getValues());
         }
     }
     //</editor-fold>
@@ -594,13 +596,15 @@ public class ExpertShellController {
     @FXML
     private TableColumn<Variable, String> variableNameColumn;
     @FXML
-    private TableColumn<Variable, Classes> variableAttributionColumn;
+    private TableColumn<Variable, Types> variableAttributionColumn;
     @FXML
     private TableColumn<Variable, Domain> variableDomainColumn;
     @FXML
     private TextField variableLabelTextField;
     @FXML
     private TextField variableDomainTextField;
+    @FXML
+    private ListView<Value> varDomainValuesListView;
     @FXML
     private TextField variableAttributionTextField;
     @FXML
@@ -732,31 +736,16 @@ public class ExpertShellController {
 
         domainNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         domainTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        domainValuesListView.setCellFactory(new Callback<>() {
-            @Override
-            public ListCell<Value> call(ListView<Value> valueListView) {
-                return new ListCell<>() {
-                    @Override
-                    protected void updateItem(Value item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null || empty)
-                            setGraphic(null);
-                        else
-                            setText(item.getContent());
-                    }
-                };
-            }
-        });
 
         variablesTableView.getSelectionModel().selectedItemProperty().addListener(this::variableTableViewSelectionChanged);
         variableNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         variableAttributionColumn.setCellValueFactory(new PropertyValueFactory<>("varClass"));
         variableAttributionColumn.setCellFactory(new Callback<>() {
             @Override
-            public TableCell<Variable, Classes> call(TableColumn<Variable, Classes> variableClassesTableColumn) {
+            public TableCell<Variable, Types> call(TableColumn<Variable, Types> variableClassesTableColumn) {
                 return new TableCell<>() {
                     @Override
-                    protected void updateItem(Classes item, boolean empty) {
+                    protected void updateItem(Types item, boolean empty) {
                         super.updateItem(item, empty);
                         if (item == null) {
                             super.setText(null);

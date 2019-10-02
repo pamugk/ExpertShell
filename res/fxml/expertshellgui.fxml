@@ -267,7 +267,12 @@
                             </TitledPane>
                             <TitledPane animated="false" text="%variableDomain" VBox.vgrow="ALWAYS">
                                 <AnchorPane minHeight="-Infinity" minWidth="-Infinity">
-                                    <TextField fx:id="variableDomainTextField" editable="false" promptText="%variableDomainPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <TextField fx:id="variableDomainTextField" editable="false" promptText="%variableDomainPrompt"/>
+                                        <TitledPane animated="false" text="%variableAttribution" VBox.vgrow="ALWAYS">
+                                            <ListView fx:id="varDomainValuesListView" />
+                                        </TitledPane>
+                                    </VBox>
                                 </AnchorPane>
                             </TitledPane>
                             <TitledPane animated="false" text="%variableAttribution" VBox.vgrow="ALWAYS">

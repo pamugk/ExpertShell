@@ -55,9 +55,9 @@ public class DomainDialogController {
 
     private void setup(Domain domain, KnowledgeBase kb) {
         this.domain = domain;
+        this.kb = kb;
         nameTextField.setText(domain.getName());
         valuesListView.getItems().addAll(domain.getValues());
-        this.kb = kb;
     }
 
     private boolean showValueDialog(Value oldValue, String title, String header) {

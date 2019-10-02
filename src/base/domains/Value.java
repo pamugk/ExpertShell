@@ -1,9 +1,11 @@
 package base.domains;
 
+import base.rules.Assignable;
+
 import java.io.Serializable;
 import java.util.UUID;
 
-public class Value implements Serializable {
+public class Value implements Assignable, Serializable {
     private UUID guid;
     private String content;
 
@@ -22,5 +24,15 @@ public class Value implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return content;
+    }
+
+    @Override
+    public String getFactPart() {
+        return content;
     }
 }

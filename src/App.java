@@ -9,7 +9,6 @@ import javafx.stage.Stage;
 import transfer.BinKnowledgeBaseExporter;
 import transfer.BinKnowledgeBaseImporter;
 
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class App extends Application {

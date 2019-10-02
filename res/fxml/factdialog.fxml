@@ -113,7 +113,7 @@
                     </RadioButton>
                     <RadioButton fx:id="sourceVariableRadiobtn" mnemonicParsing="false" text="%sourceVar" toggleGroup="$source" />
                 </VBox>
-            <HBox fx:id="selectionHbox" alignment="CENTER" prefWidth="100.0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                <ComboBox fx:id="rightFactableCombobox" minWidth="100.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
             </GridPane>
         </HBox>
         <GridPane prefWidth="300.0" VBox.vgrow="SOMETIMES">

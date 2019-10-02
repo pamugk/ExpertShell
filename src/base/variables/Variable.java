@@ -4,17 +4,17 @@ import base.domains.Domain;
 import base.environmentvars.CFVA;
 import base.environmentvars.WHN;
 import base.environmentvars.RIGR;
+import base.rules.Assignable;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-public class Variable implements Serializable {
+public class Variable implements Assignable, Serializable {
     private UUID guid;
     private Domain domain;
-    private Classes varClass;
+    private Types varClass;
 
     private String name;
-    private String value;
     private String label;
     private WHN when;
     private CFVA type;
@@ -22,7 +22,7 @@ public class Variable implements Serializable {
     private RIGR rigor;
     private String question;
 
-    public Variable(UUID guid, String name, Domain domain, Classes varClass) {
+    public Variable(UUID guid, String name, Domain domain, Types varClass) {
         this.guid = guid;
         this.name = name;
         this.domain = domain;
@@ -39,11 +39,9 @@ public class Variable implements Serializable {
         this.domain = domain;
     }
 
-    public String getValue() { return value; }
-    public void setValue(String value) { this.value = value; }
     public UUID getGuid() { return guid; }
-    public Classes getVarClass() { return varClass; }
-    public void setVarClass(Classes varClass) { this.varClass = varClass; }
+    public Types getVarClass() { return varClass; }
+    public void setVarClass(Types varClass) { this.varClass = varClass; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getLabel(){ return label; }
@@ -61,4 +59,9 @@ public class Variable implements Serializable {
 
     @Override
     public String toString() {  return name; }
+
+    @Override
+    public String getFactPart() {
+        return name;
+    }
 }

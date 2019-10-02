@@ -1,13 +1,9 @@
 package expertshellgui;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-
 import base.knowledgebase.KnowledgeBase;
 import base.rules.Fact;
 import base.rules.Rule;
-import base.variables.Classes;
+import base.variables.Types;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +17,11 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+
 public class RuleDialogController {
     private KnowledgeBase kb;
     private Rule rule;
@@ -28,7 +29,7 @@ public class RuleDialogController {
     private Image editImage;
 
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
-    private void addFact(ListView<Fact> factView, List<Classes> forbiddenClasses) {
+    private void addFact(ListView<Fact> factView, List<Types> forbiddenClasses) {
         Fact newFact;
         try {
             newFact = FactDialogController.showAndWait(new Fact(), resources.getString("addFact"),
@@ -37,6 +38,8 @@ public class RuleDialogController {
             e.printStackTrace();
             return;
         }
+        if (newFact == null)
+            return;
         var currentIdx = factView.getSelectionModel().getSelectedIndex();
         if (currentIdx == -1) {
             factView.getItems().add(newFact);
@@ -53,7 +56,7 @@ public class RuleDialogController {
                 premisesListView.getItems().isEmpty() || conclusionsListView.getItems().isEmpty());
     }
 
-    private void editFact(ListView<Fact> factView, List<Classes> forbiddenClasses) {
+    private void editFact(ListView<Fact> factView, List<Types> forbiddenClasses) {
         int idx = factView.getSelectionModel().getSelectedIndex();
         Fact editedFact;
         try {
@@ -64,6 +67,8 @@ public class RuleDialogController {
             e.printStackTrace();
             return;
         }
+        if (editedFact == null)
+            return;
         factView.getItems().set(idx, editedFact);
     }
 
@@ -103,8 +108,6 @@ public class RuleDialogController {
     @FXML
     private ResourceBundle resources;
     @FXML
-    private URL location;
-    @FXML
     private TextField nameTextField;
     @FXML
     private TextArea reasonTextArea;
@@ -134,7 +137,7 @@ public class RuleDialogController {
     //<editor-fold defaultstate="collapsed" desc="Обработчики событий">
     @FXML
     void addConclusionBtn_OnAction(ActionEvent event) {
-        addFact(conclusionsListView, Collections.singletonList(Classes.REQUESTED));
+        addFact(conclusionsListView, Collections.singletonList(Types.REQUESTED));
     }
 
     @FXML
@@ -150,7 +153,7 @@ public class RuleDialogController {
 
     @FXML
     void editConclusionBtn_OnAction(ActionEvent event) {
-        editFact(conclusionsListView, Collections.singletonList(Classes.REQUESTED));
+        editFact(conclusionsListView, Collections.singletonList(Types.REQUESTED));
     }
 
     @FXML

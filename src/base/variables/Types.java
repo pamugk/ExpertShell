@@ -1,6 +1,6 @@
 package base.variables;
 
-public enum Classes {
+public enum Types {
     REQUESTED,
     DEDUCTED,
     REQUESTED_DEDUCTED,
