@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Tab?>
@@ -21,7 +22,10 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expertshellgui.ExpertShellController">
@@ -227,9 +231,9 @@
                 </tooltip>
             </Button>
         </ToolBar>
-        <TabPane fx:id="mainTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <Tab fx:id="domainsTab" text="%domains">
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <AnchorPane>
                     <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <TableView fx:id="domainsTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS">
                             <columns>
@@ -240,9 +244,9 @@
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                             </columnResizePolicy>
                         </TableView>
-                        <TitledPane text="%domainValues" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS">
-                            <ListView fx:id="domainValuesListView" />
-                        </TitledPane>
+                   <TitledPane collapsible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%domainValues" HBox.hgrow="ALWAYS">
+                       <ListView fx:id="domainValuesListView" />
+                   </TitledPane>
                     </HBox>
                 </AnchorPane>
             </Tab>
@@ -259,33 +263,44 @@
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                             </columnResizePolicy>
                         </TableView>
-                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="SOMETIMES">
-                            <TitledPane animated="false" text="%variableLabel">
-                                <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <TextField fx:id="variableLabelTextField" editable="false" promptText="%variableLabelPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                </AnchorPane>
-                            </TitledPane>
-                            <TitledPane animated="false" text="%variableDomain" VBox.vgrow="ALWAYS">
-                                <AnchorPane minHeight="-Infinity" minWidth="-Infinity">
-                                    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                        <TextField fx:id="variableDomainTextField" editable="false" promptText="%variableDomainPrompt"/>
-                                        <TitledPane animated="false" text="%variableAttribution" VBox.vgrow="ALWAYS">
-                                            <ListView fx:id="varDomainValuesListView" />
-                                        </TitledPane>
-                                    </VBox>
-                                </AnchorPane>
-                            </TitledPane>
-                            <TitledPane animated="false" text="%variableAttribution" VBox.vgrow="ALWAYS">
-                                <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <TextField fx:id="variableAttributionTextField" editable="false" promptText="%variableAttributionPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                </AnchorPane>
-                            </TitledPane>
-                            <TitledPane animated="false" text="%variableQuestion" VBox.vgrow="ALWAYS">
-                                <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <TextArea fx:id="variableQuestionTextArea" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="%variableQuestionPrompt" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                </AnchorPane>
-                            </TitledPane>
-                        </VBox>
+                        <ScrollPane cacheShape="false" prefHeight="496.0" prefWidth="275.0">
+                            <AnchorPane cacheShape="false">
+                                <VBox cacheShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%variableLabel" VBox.vgrow="ALWAYS">
+                                        <AnchorPane>
+                                            <TextField fx:id="variableLabelTextField" editable="false" promptText="%variableLabelPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                        </AnchorPane>
+                                    </TitledPane>
+                                    <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%variableAttribution" VBox.vgrow="ALWAYS">
+                                        <AnchorPane>
+                                            <TextField fx:id="variableAttributionTextField" editable="false" promptText="%variableAttributionPrompt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                        </AnchorPane>
+                                    </TitledPane>
+                                    <TitledPane cacheShape="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%variableQuestion" VBox.vgrow="ALWAYS">
+                                        <AnchorPane cacheShape="false">
+                                            <TextArea fx:id="variableQuestionTextArea" cacheShape="false" editable="false" prefHeight="100.0" prefWidth="200.0" promptText="%variableQuestionPrompt" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                        </AnchorPane>
+                                    </TitledPane>
+                                    <TitledPane expanded="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%variableDomain" VBox.vgrow="ALWAYS">
+                                        <AnchorPane minHeight="-Infinity" minWidth="-Infinity">
+                                            <GridPane layoutX="9.600000381469727" layoutY="9.600000381469727" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <columnConstraints>
+                                                    <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" />
+                                                </columnConstraints>
+                                                <rowConstraints>
+                                                    <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
+                                                    <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
+                                                </rowConstraints>
+                                                <TextField fx:id="variableDomainTextField" editable="false" promptText="%variableDomainPrompt" />
+                                                <TitledPane animated="false" text="%domainValues" GridPane.rowIndex="1">
+                                                    <ListView fx:id="varDomainValuesListView" />
+                                                </TitledPane>
+                                            </GridPane>
+                                        </AnchorPane>
+                                    </TitledPane>
+                                </VBox>
+                            </AnchorPane>
+                        </ScrollPane>
                     </HBox>
                 </AnchorPane>
             </Tab>
@@ -301,20 +316,20 @@
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                             </columnResizePolicy>
                         </TableView>
-                        <VBox prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <TitledPane animated="false" text="%rulePremises" VBox.vgrow="ALWAYS">
+                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%rulePremises" VBox.vgrow="ALWAYS">
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <ListView fx:id="rulePremisesListView" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <ListView fx:id="rulePremisesListView" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                 </AnchorPane>
                             </TitledPane>
-                            <TitledPane animated="false" text="%ruleConclusionos" VBox.vgrow="ALWAYS">
+                            <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%ruleConclusionos" VBox.vgrow="ALWAYS">
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <ListView fx:id="ruleConclusionsListView" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <ListView fx:id="ruleConclusionsListView" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                 </AnchorPane>
                             </TitledPane>
-                            <TitledPane animated="false" text="%ruleComment" VBox.vgrow="ALWAYS">
+                            <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%ruleComment" VBox.vgrow="ALWAYS">
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <TextArea fx:id="ruleCommentTextArea" layoutX="-11.0" layoutY="-21.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <TextArea fx:id="ruleCommentTextArea" layoutX="-11.0" layoutY="-21.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                 </AnchorPane>
                             </TitledPane>
                         </VBox>

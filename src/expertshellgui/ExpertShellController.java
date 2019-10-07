@@ -151,15 +151,20 @@ public class ExpertShellController {
         showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
     }
 
-    private void closeKb() {
-        if (showDialog(resources.getString("closeKbTitle"), resources.getString("closeKbHeader"),
-                resources.getString("closeKbMessage"), Alert.AlertType.NONE))
+    private boolean closeKb() {
+        ButtonType response = showDialog(resources.getString("closeKbTitle"), resources.getString("closeKbHeader"),
+                resources.getString("closeKbMessage"), Alert.AlertType.NONE);
+        if (response == ButtonType.OK)
             saveKb();
+        else
+            if (response == ButtonType.CANCEL)
+                return false;
         expertSystem.setKnowledgeBase(null);
         domainsTableView.getItems().clear();
         variablesTableView.getItems().clear();
         rulesTableView.getItems().clear();
         changeInterfaceState();
+        return true;
     }
 
     private void domainTableViewSelectionChanged(ObservableValue<? extends Number> observableValue, Number oldIndex,
@@ -235,6 +240,27 @@ public class ExpertShellController {
         showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
     }
 
+    private <T> void generateListViewCellFactory(ListView<T> listView) {
+        listView.setCellFactory(valueListView -> {
+            ListCell<T> newCell = new ListCell<>() {
+                @Override
+                protected void updateItem(T item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(item.toString());
+                    }
+                }
+            };
+            newCell.setOnMouseClicked(mouseEvent -> {
+                if (newCell.isEmpty())
+                    listView.getSelectionModel().clearSelection();
+            });
+            return newCell;
+        });
+    }
+
     private FileChooser generateFileChooser(String title, List<String> fileExtDescrs, List<String> fileExts) {
         FileChooser kbChooser = new FileChooser();
         for (int i = 0; i < fileExtDescrs.size(); i++)
@@ -306,7 +332,8 @@ public class ExpertShellController {
 
     private void quit() {
         if (expertSystem.kbIsLoaded())
-            closeKb();
+            if (!closeKb())
+                return;
         stage.close();
     }
 
@@ -357,6 +384,17 @@ public class ExpertShellController {
     private void ruleTableViewSelectionChanged(ObservableValue<? extends Number> observableValue, Number oldIndex,
         Number newIndex) {
         boolean disable = newIndex.intValue() == -1;
+        rulePremisesListView.getItems().clear();
+        ruleConclusionsListView.getItems().clear();
+        ruleCommentTextArea.clear();
+
+        if (!disable) {
+            Rule selectedRule = rulesTableView.getItems().get(newIndex.intValue());
+            rulePremisesListView.getItems().addAll(selectedRule.getPremises());
+            ruleConclusionsListView.getItems().addAll(selectedRule.getConclusions());
+            ruleCommentTextArea.setText(selectedRule.getComment());
+        }
+
         changeSpecificActionsState(disable);
     }
 
@@ -413,13 +451,13 @@ public class ExpertShellController {
         showMessage(resources.getString("about"), resources.getString("aboutText"), Alert.AlertType.INFORMATION);
     }
 
-    private boolean showDialog(String title, String header, String message, Alert.AlertType type){
-        Alert alert = new Alert(type, message, ButtonType.OK, ButtonType.CANCEL);
+    private ButtonType showDialog(String title, String header, String message, Alert.AlertType type){
+        Alert alert = new Alert(type, message, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         alert.setHeaderText(header);
         alert.setTitle(title);
         alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
+        return result.isPresent() ? result.get() : ButtonType.CANCEL;
     }
 
     private void showHelp() {
@@ -462,14 +500,18 @@ public class ExpertShellController {
 
     private <T> void tableViewSmartInsert(TableView<T> tableView, List<T> kbCollection, T newItem) {
         var currentIdx = tableView.getSelectionModel().getSelectedIndex();
+        int newIdx;
         if (currentIdx == -1) {
             kbCollection.add(newItem);
             tableView.getItems().add(newItem);
+            newIdx = kbCollection.size() - 1;
         }
         else{
-            kbCollection.add(currentIdx+1, newItem);
-            tableView.getItems().add(currentIdx+1, newItem);
+            newIdx = currentIdx+1;
+            kbCollection.add(newIdx, newItem);
+            tableView.getItems().add(newIdx, newItem);
         }
+        tableView.getSelectionModel().select(newIdx);
     }
 
     private void updateTablesAfterRule() {
@@ -730,12 +772,46 @@ public class ExpertShellController {
         assert ruleCommentTextArea != null : "fx:id=\"ruleCommentTextArea\" was not injected: check your FXML file 'expertshellgui.fxml'.";
 
         mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
-        domainsTableView.getSelectionModel().selectedIndexProperty().addListener(this::domainTableViewSelectionChanged);
-        rulesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
-        variablesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
 
+        domainsTableView.getSelectionModel().selectedIndexProperty().addListener(this::domainTableViewSelectionChanged);
+        domainsTableView.setRowFactory(domainTableView -> {
+            TableRow<Domain> newRow = new TableRow<>();
+            newRow.setOnMouseClicked(mouseEvent -> {
+                if (newRow.isEmpty())
+                    domainTableView.getSelectionModel().clearSelection();
+            });
+            return newRow;
+        });
         domainNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         domainTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        generateListViewCellFactory(domainValuesListView);
+
+        rulesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
+        rulesTableView.setRowFactory(ruleTableView -> {
+            TableRow<Rule> newRow = new TableRow<>();
+            newRow.setOnMouseClicked(mouseEvent -> {
+                if (newRow.isEmpty())
+                    rulesTableView.getSelectionModel().clearSelection();
+            });
+            return newRow;
+        });
+        ruleNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        ruleContentColumn.setCellFactory(new Callback<TableColumn<Rule, String>, TableCell<Rule, String>>() {
+            @Override
+            public TableCell<Rule, String> call(TableColumn<Rule, String> ruleStringTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty)
+                            setText(null);
+                        else setText(getTableRow().getItem().getContent());
+                    }
+                };
+            }
+        });
+        generateListViewCellFactory(rulePremisesListView);
+        generateListViewCellFactory(ruleConclusionsListView);
 
         variablesTableView.getSelectionModel().selectedItemProperty().addListener(this::variableTableViewSelectionChanged);
         variableNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -772,6 +848,15 @@ public class ExpertShellController {
                 };
             }
         });
+        variablesTableView.setRowFactory(variableTableView -> {
+            TableRow<Variable> newRow = new TableRow<>();
+            newRow.setOnMouseClicked(mouseEvent -> {
+                if (newRow.isEmpty())
+                    variablesTableView.getSelectionModel().clearSelection();
+            });
+            return newRow;
+        });
+        generateListViewCellFactory(varDomainValuesListView);
 
         addImage = new Image("/icons/newItem.png");
         editImage = new Image("/icons/editItem.png");

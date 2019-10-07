@@ -20,13 +20,19 @@
     <VBox layoutX="33.0" layoutY="41.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Label text="%ruleName">
             <padding>
-                <Insets left="10.0" />
+                <Insets bottom="10.0" left="10.0" top="10.0" />
             </padding>
         </Label>
         <TextField fx:id="nameTextField" promptText="%namePrompt" />
-        <Label text="%ruleReason" />
+        <Label text="%ruleReason">
+         <padding>
+            <Insets bottom="10.0" top="10.0" />
+         </padding></Label>
       <TextArea fx:id="reasonTextArea" prefHeight="96.0" prefWidth="400.0" promptText="%ruleReasonPrompt" wrapText="true" />
-        <Label text="%ruleComment" />
+        <Label text="%ruleComment">
+         <padding>
+            <Insets bottom="10.0" top="10.0" />
+         </padding></Label>
       <TextArea fx:id="commentTextArea" prefHeight="129.0" prefWidth="400.0" promptText="%ruleCommentPrompt" />
       <GridPane>
          <columnConstraints>
@@ -76,6 +82,9 @@
                </children>
             </HBox>
          </children>
+         <padding>
+            <Insets bottom="10.0" top="10.0" />
+         </padding>
       </GridPane>
         <ListView fx:id="premisesListView" prefHeight="200.0" prefWidth="200.0" />
       <GridPane>
@@ -129,6 +138,9 @@
                </children>
             </HBox>
          </children>
+         <padding>
+            <Insets bottom="10.0" top="10.0" />
+         </padding>
       </GridPane>
         <ListView fx:id="conclusionsListView" prefHeight="200.0" prefWidth="400.0" />
         <GridPane>
@@ -141,6 +153,12 @@
             </rowConstraints>
             <Button fx:id="okButton" disable="true" mnemonicParsing="false" onAction="#okButton_OnAction" text="%ok" />
             <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#cancelButton_OnAction" text="%cancel" GridPane.columnIndex="1" />
+         <padding>
+            <Insets top="10.0" />
+         </padding>
         </GridPane>
+      <padding>
+         <Insets bottom="10.0" left="10.0" right="10.0" />
+      </padding>
     </VBox>
 </AnchorPane>

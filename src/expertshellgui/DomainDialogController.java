@@ -11,7 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DomainDialogController {
     private Domain domain;
     private KnowledgeBase kb;
+
+    private int draggedIdx;
 
     static Domain showAndWait(Domain oldDomain, String title, Image icon,
                               KnowledgeBase kb, ResourceBundle resources) throws IOException {
@@ -47,7 +49,7 @@ public class DomainDialogController {
     private void disableOkButton(String newName) {
         okButton.setDisable(newName == null || newName.trim().equals("")
                 || kb.getUsedDomains().stream().anyMatch(someDomain ->
-                !someDomain.getGuid().equals(domain.getGuid()) && someDomain.getName().equals(domain.getName()))
+                !someDomain.getGuid().equals(domain.getGuid()) && someDomain.getName().equals(newName))
                 || valuesListView.getItems().size() == 0);
     }
 
@@ -116,11 +118,17 @@ public class DomainDialogController {
         Value newValue = new Value(UUID.randomUUID(), resources.getString("newValue"));
         if (showValueDialog(newValue, resources.getString("newValue"), resources.getString("newValue"))){
             int currentIdx = valuesListView.getSelectionModel().getSelectedIndex();
-            if (currentIdx == -1)
+            int newIdx;
+            if (currentIdx == -1){
                 valuesListView.getItems().add(newValue);
-            else
+                newIdx = valuesListView.getItems().size() - 1;
+            }
+            else{
+                newIdx = currentIdx+1;
                 valuesListView.getItems().add(currentIdx+1, newValue);
+            }
             disableOkButton(nameTextField.getText());
+            valuesListView.getSelectionModel().select(newIdx);
         }
     }
 
@@ -152,16 +160,6 @@ public class DomainDialogController {
         valuesListView.getItems().remove(valuesListView.getSelectionModel().getSelectedIndex());
         disableOkButton(nameTextField.getText());
     }
-
-    @FXML
-    void valuesListView_OnMouseClicked(MouseEvent event) {
-
-    }
-
-    @FXML
-    void valuesListView_OnMouseDragged(MouseEvent event) {
-
-    }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Инициализация">
     @FXML
@@ -178,14 +176,72 @@ public class DomainDialogController {
 
         nameTextField.textProperty().addListener(((observableValue, oldValue, newValue) -> disableOkButton(newValue)));
         valuesListView.getSelectionModel().selectedIndexProperty().addListener(this::valuesSelectedIndexChanged);
-        valuesListView.setCellFactory(param -> new ListCell<>() {
-            @Override
-            protected void updateItem(Value item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty)
-                    setText(null);
-                else setText(item.getContent());
-            }
+        valuesListView.setCellFactory(param -> {
+            ListCell<Value> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(Value item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty)
+                        setText(null);
+                    else setText(item.getContent());
+                }
+            };
+
+            cell.setOnDragDetected(mouseEvent -> {
+                if (cell.getItem() == null) {
+                    return;
+                }
+
+                draggedIdx = cell.getIndex();
+                Dragboard dragboard = cell.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(cell.getItem().toString());
+                dragboard.setContent(content);
+
+                mouseEvent.consume();
+            });
+            cell.setOnDragOver(dragEvent -> {
+                if (dragEvent.getGestureSource() != cell &&
+                        dragEvent.getDragboard().hasString()) {
+                    dragEvent.acceptTransferModes(TransferMode.MOVE);
+                }
+                dragEvent.consume();
+            });
+            cell.setOnDragEntered(dragEvent -> {
+                if (dragEvent.getGestureSource() != cell &&
+                        dragEvent.getDragboard().hasString()) {
+                    cell.setOpacity(0.3);
+                }
+            });
+            cell.setOnDragExited(dragEvent -> {
+                if (dragEvent.getGestureSource() != cell &&
+                        dragEvent.getDragboard().hasString()) {
+                    cell.setOpacity(1);
+                }
+            });
+            cell.setOnDragDropped(dragEvent -> {
+                if (cell.getItem() == null) {
+                    return;
+                }
+
+                Dragboard db = dragEvent.getDragboard();
+                boolean success = false;
+
+                if (db.hasString()) {
+                    Value draggedVal = valuesListView.getItems().get(draggedIdx);
+                    int thisIdx = cell.getIndex();
+                    valuesListView.getItems().set(draggedIdx, cell.getItem());
+                    valuesListView.getItems().set(thisIdx,draggedVal);
+                    success = true;
+                    disableOkButton(nameTextField.getText());
+                }
+                dragEvent.setDropCompleted(success);
+
+                dragEvent.consume();
+            });
+            cell.setOnDragDone(DragEvent::consume);
+
+            return cell;
         });
     }
     //</editor-fold>

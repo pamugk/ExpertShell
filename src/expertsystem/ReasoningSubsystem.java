@@ -1,4 +1,4 @@
 package expertsystem;
 
-class ReasoningSubsystem {
+public class ReasoningSubsystem {
 }

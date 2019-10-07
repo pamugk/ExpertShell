@@ -16,4 +16,9 @@ public class Fact implements Serializable {
     }
     public Assignable getAssignable() { return assignable; }
     public void setAssignable(Assignable assignable) { this.assignable = assignable; }
+
+    @Override
+    public String toString() {
+        return String.format("%s = %s", variable.getName(), assignable.getFactPart());
+    }
 }

@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Rule implements Serializable {
     private UUID guid;
@@ -17,6 +18,7 @@ public class Rule implements Serializable {
     private List<Fact> conclusions;
     private List<Variable> changes;
 
+    private int idx;
     private int priority;
     private int cost;
     private String reason;
@@ -58,6 +60,8 @@ public class Rule implements Serializable {
     public List<Variable> getChanges() {
         return changes;
     }
+    public int getIdx() { return idx; }
+    public void setIdx(int idx) { this.idx = idx; }
     public int getPriority() {
         return priority;
     }
@@ -79,4 +83,10 @@ public class Rule implements Serializable {
 
     @Override
     public String toString(){ return name; }
+
+    public String getContent() {
+        return String.format("Предпосылки: %s;\nЗаключения: %s", premises.stream().map(Fact::toString)
+                .collect(Collectors.joining(" & ")), conclusions.stream().map(Fact::toString)
+                .collect(Collectors.joining("; ")));
+    }
 }

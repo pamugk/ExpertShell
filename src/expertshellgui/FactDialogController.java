@@ -26,6 +26,7 @@ public class FactDialogController {
     private List<Types> restrictedClasses;
     private Image addImage;
     private Image editImage;
+    private boolean isPremise;
 
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private void addVariable(ComboBox<? super Variable> varCombo, List<Types> restrictedClasses) {
@@ -40,6 +41,8 @@ public class FactDialogController {
             e.printStackTrace();
             return;
         }
+        if (newVariable == null)
+            return;
         varCombo.getItems().add(newVariable);
         varCombo.getSelectionModel().selectLast();
     }
@@ -67,6 +70,8 @@ public class FactDialogController {
             e.printStackTrace();
             return;
         }
+        if (editedVariable == null)
+            return;
         varCombo.getItems().set(idx, editedVariable);
         varCombo.getSelectionModel().select(idx);
     }
@@ -76,13 +81,14 @@ public class FactDialogController {
     }
 
     private void leftVarSelectionChanged(Variable newVar) {
-        rightFactableCombobox.getItems().clear();
-        rightFactableCombobox.getItems().addAll(newVar.getDomain().getValues());
+        if (sourceVariableRadiobtn.isSelected())
+            sourceDomainRadiobtn.setSelected(true);
+        else sourceChanged(true);
         disableOkButton();
     }
 
     private void rightFactableSelectionChanged(Assignable newAssignable) {
-        editRightVarBtn.setDisable(sourceVariableRadiobtn.isSelected() && newAssignable == null);
+        editRightVarBtn.setDisable(sourceDomainRadiobtn.isSelected() || newAssignable == null);
         disableOkButton();
     }
 
@@ -90,10 +96,14 @@ public class FactDialogController {
         this.fact = oldFact;
         this.kb = kb;
         this.restrictedClasses = restrictedClasses;
+        leftVarCombobox.getItems().setAll(kb.getVariables().stream().filter(
+                variable -> !restrictedClasses.contains(variable.getVarClass())).collect(Collectors.toList()));
+        leftVarCombobox.getSelectionModel().select(oldFact.getVariable());
+        rightFactableCombobox.getSelectionModel().select(oldFact.getAssignable());
     }
 
     static Fact showAndWait(Fact oldFact, String title, Image icon, KnowledgeBase kb, ResourceBundle resources,
-                            List<Types> restrictedClasses) throws IOException {
+                            List<Types> restrictedClasses, boolean isPremise) throws IOException {
         FXMLLoader loader = new FXMLLoader(DomainDialogController.class.getResource("/fxml/factdialog.fxml"),
                 resources);
         Parent dialogRoot = loader.load();
@@ -104,26 +114,36 @@ public class FactDialogController {
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
         dialog.setup(oldFact, kb, restrictedClasses);
+        if (isPremise) {
+            dialog.leftVarLabel.setText(resources.getString("comparedVar"));
+            dialog.rightVarLabel.setText(resources.getString("comparedVal"));
+        }
+        else {
+            dialog.leftVarLabel.setText(resources.getString("changedVar"));
+            dialog.rightVarLabel.setText(resources.getString("assignedVal"));
+        }
         dialogStage.showAndWait();
         return dialog.getFact();
     }
 
     private void sourceChanged(boolean isDomain) {
         rightFactableCombobox.getItems().clear();
+        editRightVarBtn.setDisable(true);
+        addRightVarBtn.setDisable(isDomain);
+        Variable variable = leftVarCombobox.getSelectionModel().getSelectedItem();
         if (isDomain) {
             addRightVarBtn.getTooltip().setText(resources.getString("addDomain"));
-            addRightVarBtn.setDisable(true);
             editRightVarBtn.getTooltip().setText(resources.getString("editDomain"));
-            editRightVarBtn.setDisable(true);
-            Variable variable = leftVarCombobox.getSelectionModel().getSelectedItem();
             if (variable != null)
                 rightFactableCombobox.getItems().addAll(variable.getDomain().getValues());
         }
         else{
             addRightVarBtn.getTooltip().setText(resources.getString("addVariable"));
-            addRightVarBtn.setDisable(false);
             editRightVarBtn.getTooltip().setText(resources.getString("editVariable"));
-            addRightVarBtn.setDisable(rightFactableCombobox.getSelectionModel().getSelectedIndex() != -1);
+            if (variable != null) {
+                rightFactableCombobox.getItems().addAll(kb.getVariables());
+                rightFactableCombobox.getItems().remove(variable);
+            }
         }
         disableOkButton();
     }
@@ -135,7 +155,7 @@ public class FactDialogController {
     @FXML
     private URL location;
     @FXML
-    private Label leftVarLabel;
+    protected Label leftVarLabel;
     @FXML
     private Button addLeftVarBtn;
     @FXML
