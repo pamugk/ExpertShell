@@ -2,12 +2,44 @@
 <Diagram>
   <ID>JAVA</ID>
   <OriginalElement>expertsystem.ExpertSystem</OriginalElement>
-  <nodes />
+  <nodes>
+    <node x="610.0" y="757.0">expertsystem.ReasoningSubsystem</node>
+    <node x="631.0" y="506.0">expertsystem.ScratchStorage</node>
+    <node x="0.0" y="757.0">base.variables.Types</node>
+    <node x="127.5" y="0.0">base.rules.Assignable</node>
+    <node x="379.0" y="757.0">expertsystem.InferentialMechanism</node>
+    <node x="188.0" y="757.0">base.rules.Fact</node>
+    <node x="0.0" y="506.0">base.knowledgebase.KnowledgeBase</node>
+    <node x="664.0" y="0.0">base.domains.Domain</node>
+    <node x="171.0" y="122.0">base.variables.Variable</node>
+    <node x="306.0" y="506.0">expertsystem.ExpertSystem</node>
+    <node x="0.0" y="221.5">base.domains.Value</node>
+    <node x="465.0" y="0.0">base.rules.Rule</node>
+  </nodes>
   <notes />
-  <edges />
-  <settings layout="Hierarchic Group" zoom="1.0" x="460.0" y="269.5" />
+  <edges>
+    <edge source="base.variables.Variable" target="base.rules.Assignable">
+      <point x="0.0" y="-169.5" />
+      <point x="295.5" y="97.0" />
+      <point x="214.5" y="97.0" />
+      <point x="29.0" y="36.0" />
+    </edge>
+    <edge source="base.domains.Value" target="base.rules.Assignable">
+      <point x="0.0" y="-70.0" />
+      <point x="75.5" y="97.0" />
+      <point x="156.5" y="97.0" />
+      <point x="-29.0" y="36.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.8745881178232651" x="562.6140669566802" y="535.304324203576" />
   <SelectedNodes />
-  <Categories />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
   <SCOPE>All</SCOPE>
   <VISIBILITY>private</VISIBILITY>
 </Diagram>

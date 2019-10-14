@@ -5,6 +5,7 @@ import base.domains.Value;
 import base.knowledgebase.KnowledgeBase;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -187,6 +188,10 @@ public class DomainDialogController {
                 }
             };
 
+            cell.setOnMouseClicked(mouseEvent -> {
+                if (cell.getItem() == null)
+                    valuesListView.getSelectionModel().clearSelection();
+            });
             cell.setOnDragDetected(mouseEvent -> {
                 if (cell.getItem() == null) {
                     return;

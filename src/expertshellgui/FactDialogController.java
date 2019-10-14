@@ -33,7 +33,8 @@ public class FactDialogController {
         Variable newVariable;
         try {
             newVariable = VariableDialogController.showAndWait(new Variable(UUID.randomUUID(),
-                            resources.getString("newVariable"), null, Types.REQUESTED),
+                            resources.getString("newVariable"), null,
+                            restrictedClasses.size() > 0? Types.DEDUCTED : Types.REQUESTED),
                     resources.getString("addVariable"), addImage, kb, resources,
                     Arrays.stream(Types.values()).filter(clss -> !restrictedClasses.contains(clss))
                             .collect(Collectors.toList()));

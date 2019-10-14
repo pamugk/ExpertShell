@@ -17,6 +17,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -37,6 +41,8 @@ public class ExpertShellController {
     private Image addImage;
     private Image editImage;
     private Map<Types, String> types;
+    private int draggedIdx;
+
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private ExpertSystem expertSystem;
     private KnowledgeBaseExporter kbExporter;
@@ -117,6 +123,29 @@ public class ExpertShellController {
         kbNameDialog.setTitle(title);
         kbNameDialog.setHeaderText(header);
         return kbNameDialog.showAndWait();
+    }
+
+    private void cascadeRemoveRules(UUID varUuid){
+        List<Rule> rulesForRemove =
+            expertSystem.getKnowledgeBase().getRules().stream().filter(rule ->
+                    rule.getPremises().stream().anyMatch(fact -> fact.getVariable().getGuid().equals(varUuid)
+                            || fact.getAssignable() instanceof Variable && varUuid.equals(fact.getAssignable().getGuid())) ||
+                            rule.getConclusions().stream().anyMatch(fact ->
+                                    fact.getVariable().getGuid().equals(varUuid) || fact.getAssignable() instanceof Variable &&
+                                            varUuid.equals(fact.getAssignable().getGuid()))
+            ).collect(Collectors.toList());
+        rulesTableView.getItems().retainAll(rulesForRemove);
+        expertSystem.getKnowledgeBase().getRules().removeAll(rulesForRemove);
+    }
+
+    private void cascadeRemoveVariables(UUID domainUuid) {
+        List<Variable> varsForRemove = expertSystem.getKnowledgeBase().getVariables().stream().filter(variable ->
+                variable.getDomain().getGuid().equals(domainUuid)).collect(Collectors.toList());
+        varsForRemove.forEach(variable-> {
+                    expertSystem.getKnowledgeBase().getVariables().remove(variable);
+                    cascadeRemoveRules(variable.getGuid());
+                    variablesTableView.getItems().remove(variable);
+        });
     }
 
     private void changeInterfaceState() {
@@ -347,17 +376,7 @@ public class ExpertShellController {
         var kb = expertSystem.getKnowledgeBase();
         var uuid = kb.getUsedDomains().get(idx).getGuid();
         kb.getUsedDomains().remove(idx);
-        var vars = kb.getVariables().stream().filter(variable ->
-                variable.getDomain().getGuid().equals(uuid)).collect(Collectors.toList());
-        kb.getVariables().removeAll(vars);
-        kb.getRules().removeIf(rule ->
-                rule.getPremises().stream().anyMatch(fact ->
-                        vars.contains(fact.getVariable()) || fact.getAssignable() instanceof Variable &&
-                                vars.stream().anyMatch(var -> var.getGuid().equals((fact.getAssignable()).getGuid()))) ||
-                        rule.getConclusions().stream().anyMatch(fact ->
-                                vars.contains(fact.getVariable()) || fact.getAssignable() instanceof Variable &&
-                                vars.stream().anyMatch(var -> var.getGuid().equals(fact.getAssignable().getGuid())))
-                );
+        cascadeRemoveVariables(uuid);
     }
 
     private void removeRule() {
@@ -369,16 +388,9 @@ public class ExpertShellController {
     private void removeVariable() {
         int idx = variablesTableView.getSelectionModel().getSelectedIndex();
         variablesTableView.getItems().remove(idx);
-        var kb = expertSystem.getKnowledgeBase();
-        var uuid = kb.getVariables().get(idx).getGuid();
+        var uuid = expertSystem.getKnowledgeBase().getVariables().get(idx).getGuid();
         expertSystem.getKnowledgeBase().getVariables().remove(idx);
-        kb.getRules().removeIf(rule ->
-                rule.getPremises().stream().anyMatch(fact -> fact.getVariable().getGuid().equals(uuid)
-                        || fact.getAssignable() instanceof Variable && uuid.equals(fact.getAssignable().getGuid())) ||
-                        rule.getConclusions().stream().anyMatch(fact ->
-                                fact.getVariable().getGuid().equals(uuid) || fact.getAssignable() instanceof Variable &&
-                                        uuid.equals(fact.getAssignable().getGuid()))
-        );
+        cascadeRemoveRules(uuid);
     }
 
     private void ruleTableViewSelectionChanged(ObservableValue<? extends Number> observableValue, Number oldIndex,
@@ -457,7 +469,7 @@ public class ExpertShellController {
         alert.setTitle(title);
         alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() ? result.get() : ButtonType.CANCEL;
+        return result.orElse(ButtonType.CANCEL);
     }
 
     private void showHelp() {
@@ -478,7 +490,9 @@ public class ExpertShellController {
 
     private void tabChanged(ObservableValue<? extends Tab> observableValue, Tab oldTab, Tab newTab) {
         domainsTableView.getSelectionModel().clearSelection();
+
         variablesTableView.getSelectionModel().clearSelection();
+
         rulesTableView.getSelectionModel().clearSelection();
 
         String viewedEntity;
@@ -489,6 +503,7 @@ public class ExpertShellController {
             viewedEntity = "Rule";
         else
             viewedEntity = "Variable";
+
         setActions(viewedEntity);
 
         addTool.getTooltip().setText(resources.getString(String.format("add%s", viewedEntity)));
@@ -793,17 +808,69 @@ public class ExpertShellController {
                 if (newRow.isEmpty())
                     rulesTableView.getSelectionModel().clearSelection();
             });
+            newRow.setOnDragDetected(mouseEvent -> {
+                if (newRow.getItem() == null) {
+                    return;
+                }
+
+                draggedIdx = newRow.getIndex();
+                Dragboard dragboard = newRow.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(newRow.getItem().toString());
+                dragboard.setContent(content);
+
+                mouseEvent.consume();
+            });
+            newRow.setOnDragOver(dragEvent -> {
+                if (dragEvent.getGestureSource() != newRow &&
+                        dragEvent.getDragboard().hasString()) {
+                    dragEvent.acceptTransferModes(TransferMode.MOVE);
+                }
+                dragEvent.consume();
+            });
+            newRow.setOnDragEntered(dragEvent -> {
+                if (dragEvent.getGestureSource() != newRow &&
+                        dragEvent.getDragboard().hasString()) {
+                    newRow.setOpacity(0.3);
+                }
+            });
+            newRow.setOnDragExited(dragEvent -> {
+                if (dragEvent.getGestureSource() != newRow &&
+                        dragEvent.getDragboard().hasString()) {
+                    newRow.setOpacity(1);
+                }
+            });
+            newRow.setOnDragDropped(dragEvent -> {
+                if (newRow.getItem() == null) {
+                    return;
+                }
+
+                Dragboard db = dragEvent.getDragboard();
+                boolean success = false;
+
+                if (db.hasString()) {
+                    Rule draggedRule = ruleTableView.getItems().get(draggedIdx);
+                    int thisIdx = newRow.getIndex();
+                    ruleTableView.getItems().set(draggedIdx, newRow.getItem());
+                    ruleTableView.getItems().set(thisIdx, draggedRule);
+                    success = true;
+                }
+                dragEvent.setDropCompleted(success);
+
+                dragEvent.consume();
+            });
+            newRow.setOnDragDone(DragEvent::consume);
             return newRow;
         });
         ruleNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        ruleContentColumn.setCellFactory(new Callback<TableColumn<Rule, String>, TableCell<Rule, String>>() {
+        ruleContentColumn.setCellFactory(new Callback<>() {
             @Override
             public TableCell<Rule, String> call(TableColumn<Rule, String> ruleStringTableColumn) {
                 return new TableCell<>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (empty)
+                        if (empty || getTableRow() == null || getTableRow().getItem() == null)
                             setText(null);
                         else setText(getTableRow().getItem().getContent());
                     }

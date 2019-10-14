@@ -7,10 +7,12 @@ import java.util.*;
 
 public class ScratchStorage {
     private Map<UUID, Fact> usedFacts;
+    private List<Rule> inactiveRules;
     private TreeMap<UUID, Rule> activatedRules;
 
     public ScratchStorage() {
         usedFacts = new HashMap<>();
+        inactiveRules = new ArrayList<Rule>();
         activatedRules = new TreeMap<>();
     }
 
@@ -20,6 +22,10 @@ public class ScratchStorage {
 
     public List<Fact> getUsedFacts() {
         return new ArrayList<>(usedFacts.values());
+    }
+
+    public List<Rule> getInactiveRules() {
+        return inactiveRules;
     }
 
     public TreeMap<UUID, Rule> getActivatedRules() {

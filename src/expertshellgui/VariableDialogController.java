@@ -69,12 +69,6 @@ public class VariableDialogController {
         domainComboBox.getItems().addAll(kb.getUsedDomains());
         domainComboBox.getSelectionModel().select(oldVariable.getDomain());
         questionTextArea.setText(oldVariable.getQuestion());
-        types = Map.ofEntries(
-                entry(Types.REQUESTED, resources.getString("varReq")),
-                entry(Types.DEDUCTED, resources.getString("varDed")),
-                entry(Types.REQUESTED_DEDUCTED, resources.getString("varRD")),
-                entry(Types.DEDUCTED_REQUESTED, resources.getString("varDR"))
-        );
         autoQuestionChkbox.setSelected(true);
     }
     //</editor-fold>
@@ -151,6 +145,13 @@ public class VariableDialogController {
                 questionTextArea.setText(String.format("%s?", newName));
             disableOkButton(newName, questionTextArea.getText());
         });
+
+        types = Map.ofEntries(
+                entry(Types.REQUESTED, resources.getString("varReq")),
+                entry(Types.DEDUCTED, resources.getString("varDed")),
+                entry(Types.REQUESTED_DEDUCTED, resources.getString("varRD")),
+                entry(Types.DEDUCTED_REQUESTED, resources.getString("varDR"))
+        );
         typeComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
                 disableOkButton(nameTextField.getText(), questionTextArea.getText());
                 boolean disableQuestion = newValue == Types.DEDUCTED;
@@ -177,8 +178,10 @@ public class VariableDialogController {
                 };
             }
         });
-        domainComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) ->
-                disableOkButton(nameTextField.getText(), questionTextArea.getText()));
+        domainComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
+                    disableOkButton(nameTextField.getText(), questionTextArea.getText());
+                });
+
         domainComboBox.setCellFactory(new Callback<>() {
             @Override
             public ListCell<Domain> call(ListView<Domain> domainListView) {
