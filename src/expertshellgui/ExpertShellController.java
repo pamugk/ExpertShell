@@ -134,8 +134,24 @@ public class ExpertShellController {
                                     fact.getVariable().getGuid().equals(varUuid) || fact.getAssignable() instanceof Variable &&
                                             varUuid.equals(fact.getAssignable().getGuid()))
             ).collect(Collectors.toList());
-        rulesTableView.getItems().retainAll(rulesForRemove);
-        expertSystem.getKnowledgeBase().getRules().removeAll(rulesForRemove);
+        rulesForRemove.forEach(rule -> {
+            rulesTableView.getItems().remove(rule);
+            expertSystem.getKnowledgeBase().getRules().remove(rule);
+        });
+    }
+
+    private void cascadeRemoveRulesOnDomainValue(UUID valUuid){
+        List<Rule> rulesForRemove =
+            expertSystem.getKnowledgeBase().getRules().stream().filter(rule ->
+                rule.getPremises().stream().anyMatch(fact ->
+                    fact.getAssignable() instanceof Value && valUuid.equals(fact.getAssignable().getGuid())) ||
+                rule.getConclusions().stream().anyMatch(fact ->
+                    fact.getAssignable() instanceof Value && valUuid.equals(fact.getAssignable().getGuid()))
+            ).collect(Collectors.toList());
+        rulesForRemove.forEach(rule -> {
+            rulesTableView.getItems().remove(rule);
+            expertSystem.getKnowledgeBase().getRules().remove(rule);
+        });
     }
 
     private void cascadeRemoveVariables(UUID domainUuid) {
@@ -167,6 +183,14 @@ public class ExpertShellController {
         domainsTableView.setDisable(disable);
         rulesTableView.setDisable(disable);
         variablesTableView.setDisable(disable);
+    }
+
+    private void changeInterfaceStateAccordingToGoal(Variable goal) {
+        boolean disable = goal == null;
+
+        consultMenuItem.setDisable(disable);
+        forgetMenuItem.setDisable(disable);
+        reasoningMenuItem.setDisable(disable);
     }
 
     private void changeSpecificActionsState(boolean disable) {
@@ -207,10 +231,10 @@ public class ExpertShellController {
 
     private void editDomain() {
         int idx = domainsTableView.getSelectionModel().getSelectedIndex();
-        Domain editedDomain;
+        Domain editedDomain = domainsTableView.getItems().get(idx);
+        List<Value> removedVals = new ArrayList<>(editedDomain.getValues());
         try {
-            editedDomain = DomainDialogController.showAndWait(
-                   domainsTableView.getItems().get(idx), resources.getString("editDomain"),
+            editedDomain = DomainDialogController.showAndWait(editedDomain, resources.getString("editDomain"),
                     editImage, expertSystem.getKnowledgeBase(), resources
             );
         } catch (IOException e) {
@@ -219,6 +243,9 @@ public class ExpertShellController {
         }
         if (editedDomain == null)
             return;
+        removedVals.removeAll(editedDomain.getValues());
+        for (Value val: removedVals)
+            cascadeRemoveRulesOnDomainValue(val.getGuid());
         domainsTableView.getItems().set(idx, editedDomain);
         domainTableViewSelectionChanged(null, null, idx);
     }
@@ -456,7 +483,14 @@ public class ExpertShellController {
     }
 
     private void setGoal() {
-        showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
+        Variable newGoal = expertSystem.getKnowledgeBase().getGoal();
+        try {
+            newGoal = GoalDialogController.showAndWait(newGoal,resources.getString("setGoal"),
+                    expertSystem.getKnowledgeBase(), resources);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        expertSystem.getKnowledgeBase().setGoal(newGoal);
     }
 
     private void showAbout() {
