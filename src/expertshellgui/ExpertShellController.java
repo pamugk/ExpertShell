@@ -491,6 +491,7 @@ public class ExpertShellController {
             e.printStackTrace();
         }
         expertSystem.getKnowledgeBase().setGoal(newGoal);
+        changeInterfaceStateAccordingToGoal(newGoal);
     }
 
     private void showAbout() {
