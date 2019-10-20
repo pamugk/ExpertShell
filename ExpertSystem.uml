@@ -3,36 +3,144 @@
   <ID>JAVA</ID>
   <OriginalElement>expertsystem.ExpertSystem</OriginalElement>
   <nodes>
-    <node x="610.0" y="757.0">expertsystem.ReasoningSubsystem</node>
-    <node x="631.0" y="506.0">expertsystem.ScratchStorage</node>
-    <node x="0.0" y="757.0">base.variables.Types</node>
-    <node x="127.5" y="0.0">base.rules.Assignable</node>
-    <node x="379.0" y="757.0">expertsystem.InferentialMechanism</node>
-    <node x="188.0" y="757.0">base.rules.Fact</node>
-    <node x="0.0" y="506.0">base.knowledgebase.KnowledgeBase</node>
-    <node x="664.0" y="0.0">base.domains.Domain</node>
-    <node x="171.0" y="122.0">base.variables.Variable</node>
-    <node x="306.0" y="506.0">expertsystem.ExpertSystem</node>
-    <node x="0.0" y="221.5">base.domains.Value</node>
-    <node x="465.0" y="0.0">base.rules.Rule</node>
+    <node x="487.0" y="1564.5">expertsystem.ScratchStorage</node>
+    <node x="746.0" y="1644.0">expertsystem.ReasoningSubsystem</node>
+    <node x="435.5692129629629" y="379.0">base.variables.Types</node>
+    <node x="535.3440641534391" y="0.0">base.rules.Assignable</node>
+    <node x="0.0" y="1644.0">expertsystem.InferentialMechanism</node>
+    <node x="530.4698247354497" y="1011.0">base.rules.Fact</node>
+    <node x="206.0" y="1554.0">base.knowledgebase.KnowledgeBase</node>
+    <node x="350.30834986772487" y="612.0">base.variables.Variable</node>
+    <node x="154.56921296296298" y="312.0">base.domains.Domain</node>
+    <node x="394.83333333333337" y="1840.0">expertsystem.ExpertSystem</node>
+    <node x="213.05834986772493" y="122.0">base.domains.Value</node>
+    <node x="457.2198247354498" y="1156.0">base.rules.Rule</node>
   </nodes>
   <notes />
   <edges>
+    <edge source="expertsystem.ExpertSystem" target="base.knowledgebase.KnowledgeBase">
+      <point x="-24.0" y="-81.0" />
+      <point x="502.83333333333337" y="1780.0" />
+      <point x="401.75" y="1780.0" />
+      <point x="65.25" y="103.0" />
+    </edge>
+    <edge source="base.variables.Variable" target="base.variables.Types">
+      <point x="5.6843418860808015E-14" y="-169.5" />
+      <point x="474.8083498677249" y="587.0" />
+      <point x="471.3192129629629" y="587.0" />
+      <point x="-35.75" y="58.0" />
+    </edge>
+    <edge source="base.variables.Variable" target="base.domains.Domain">
+      <point x="-99.59999999999997" y="-169.5" />
+      <point x="375.2083498677249" y="587.0" />
+      <point x="317.694212962963" y="587.0" />
+      <point x="32.625" y="125.0" />
+    </edge>
+    <edge source="base.rules.Fact" target="base.variables.Variable">
+      <point x="-18.25" y="-47.5" />
+      <point x="585.2198247354497" y="991.0" />
+      <point x="581.5226355820107" y="991.0" />
+      <point x="106.71428571428584" y="169.5" />
+    </edge>
+    <edge source="expertsystem.ExpertSystem" target="expertsystem.ReasoningSubsystem">
+      <point x="72.0" y="-81.0" />
+      <point x="598.8333333333334" y="1800.0" />
+      <point x="774.6666666666667" y="1800.0" />
+      <point x="-57.333333333333336" y="13.0" />
+    </edge>
+    <edge source="base.rules.Rule" target="base.variables.Variable">
+      <point x="-57.75" y="-169.0" />
+      <point x="476.4698247354498" y="1131.0" />
+      <point x="487.0940641534392" y="1131.0" />
+      <point x="487.0940641534392" y="991.0" />
+      <point x="474.8083498677249" y="991.0" />
+      <point x="5.6843418860808015E-14" y="169.5" />
+    </edge>
+    <edge source="base.knowledgebase.KnowledgeBase" target="base.variables.Variable">
+      <point x="0.0" y="-103.0" />
+      <point x="336.5" y="1524.0" />
+      <point x="299.5815641534392" y="1524.0" />
+      <point x="299.5815641534392" y="981.0" />
+      <point x="403.66549272486776" y="981.0" />
+      <point x="-71.14285714285711" y="169.5" />
+    </edge>
     <edge source="base.variables.Variable" target="base.rules.Assignable">
-      <point x="0.0" y="-169.5" />
-      <point x="295.5" y="97.0" />
-      <point x="214.5" y="97.0" />
-      <point x="29.0" y="36.0" />
+      <point x="99.60000000000008" y="-169.5" />
+      <point x="574.408349867725" y="587.0" />
+      <point x="593.3549272486772" y="587.0" />
+      <point x="593.3549272486772" y="102.0" />
+      <point x="578.8440641534391" y="102.0" />
+      <point x="-14.5" y="36.0" />
+    </edge>
+    <edge source="base.knowledgebase.KnowledgeBase" target="base.rules.Rule">
+      <point x="74.57142857142856" y="-103.0" />
+      <point x="411.07142857142856" y="1524.0" />
+      <point x="472.61982473544975" y="1524.0" />
+      <point x="-61.60000000000002" y="169.0" />
+    </edge>
+    <edge source="expertsystem.ExpertSystem" target="expertsystem.InferentialMechanism">
+      <point x="-120.0" y="-81.0" />
+      <point x="406.83333333333337" y="1820.0" />
+      <point x="31.0" y="1820.0" />
+      <point x="-62.0" y="13.0" />
+    </edge>
+    <edge source="expertsystem.ScratchStorage" target="base.rules.Fact">
+      <point x="47.799999999999955" y="-92.5" />
+      <point x="654.3" y="1534.0" />
+      <point x="628.8440641534391" y="1534.0" />
+      <point x="628.8440641534391" y="1131.0" />
+      <point x="621.7198247354497" y="1131.0" />
+      <point x="18.25" y="47.5" />
+    </edge>
+    <edge source="expertsystem.ScratchStorage" target="base.rules.Rule">
+      <point x="-47.799999999999955" y="-92.5" />
+      <point x="558.7" y="1534.0" />
+      <point x="565.0198247354497" y="1534.0" />
+      <point x="30.799999999999955" y="169.0" />
     </edge>
     <edge source="base.domains.Value" target="base.rules.Assignable">
       <point x="0.0" y="-70.0" />
-      <point x="75.5" y="97.0" />
-      <point x="156.5" y="97.0" />
-      <point x="-29.0" y="36.0" />
+      <point x="288.5583498677249" y="102.0" />
+      <point x="549.8440641534391" y="102.0" />
+      <point x="-43.5" y="36.0" />
+    </edge>
+    <edge source="base.domains.Domain" target="base.domains.Value">
+      <point x="-65.25" y="-125.0" />
+      <point x="219.81921296296298" y="287.0" />
+      <point x="250.80834986772493" y="287.0" />
+      <point x="-37.75" y="70.0" />
+    </edge>
+    <edge source="base.rules.Rule" target="base.rules.Fact">
+      <point x="57.75" y="-169.0" />
+      <point x="591.9698247354497" y="1131.0" />
+      <point x="585.2198247354497" y="1131.0" />
+      <point x="-18.25" y="47.5" />
+    </edge>
+    <edge source="expertsystem.ExpertSystem" target="expertsystem.ScratchStorage">
+      <point x="48.0" y="-81.0" />
+      <point x="574.8333333333334" y="1790.0" />
+      <point x="686.1666666666667" y="1790.0" />
+      <point x="79.66666666666674" y="92.5" />
+    </edge>
+    <edge source="base.knowledgebase.KnowledgeBase" target="base.domains.Domain">
+      <point x="-74.57142857142856" y="-103.0" />
+      <point x="261.92857142857144" y="1534.0" />
+      <point x="252.44421296296295" y="1534.0" />
+      <point x="-32.625" y="125.0" />
+    </edge>
+    <edge source="base.rules.Fact" target="base.rules.Assignable">
+      <point x="54.75" y="-47.5" />
+      <point x="658.2198247354497" y="991.0" />
+      <point x="645.4698247354497" y="991.0" />
+      <point x="645.4698247354497" y="92.0" />
+      <point x="636.8440641534391" y="92.0" />
+      <point x="43.5" y="36.0" />
     </edge>
   </edges>
-  <settings layout="Hierarchic Group" zoom="0.8745881178232651" x="562.6140669566802" y="535.304324203576" />
-  <SelectedNodes />
+  <settings layout="Hierarchic Group" zoom="0.8338185890257559" x="237.80006892864196" y="592.2459103012495" />
+  <SelectedNodes>
+    <node>base.rules.Rule</node>
+  </SelectedNodes>
   <Categories>
     <Category>Fields</Category>
     <Category>Constructors</Category>

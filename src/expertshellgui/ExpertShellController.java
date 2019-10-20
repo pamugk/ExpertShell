@@ -179,6 +179,8 @@ public class ExpertShellController {
         addTool.setDisable(disable);
 
         setGoalMenuItem.setDisable(disable);
+        if (!disable)
+            consultMenuItem.setDisable(expertSystem.getKnowledgeBase().getGoal() == null);
 
         domainsTableView.setDisable(disable);
         rulesTableView.setDisable(disable);
@@ -201,7 +203,11 @@ public class ExpertShellController {
     }
 
     private void consult() {
-        showMessage(resources.getString("oopsTitle"), resources.getString("oopsMessage"), Alert.AlertType.WARNING);
+        try {
+            ConsultDialogController.showAndWait(resources.getString("consulting"), expertSystem, resources);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean closeKb() {
@@ -934,6 +940,7 @@ public class ExpertShellController {
                 };
             }
         });
+
         variableDomainColumn.setCellValueFactory(new PropertyValueFactory<>("domain"));
         variableDomainColumn.setCellFactory(new Callback<>() {
             @Override
@@ -950,6 +957,7 @@ public class ExpertShellController {
                 };
             }
         });
+
         variablesTableView.setRowFactory(variableTableView -> {
             TableRow<Variable> newRow = new TableRow<>();
             newRow.setOnMouseClicked(mouseEvent -> {

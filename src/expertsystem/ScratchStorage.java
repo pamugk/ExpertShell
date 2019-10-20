@@ -1,34 +1,47 @@
 package expertsystem;
 
+import base.domains.Value;
+import base.rules.Assignable;
 import base.rules.Fact;
 import base.rules.Rule;
+import base.variables.Variable;
 
 import java.util.*;
 
-public class ScratchStorage {
+class ScratchStorage {
     private Map<UUID, Fact> usedFacts;
-    private List<Rule> inactiveRules;
-    private TreeMap<UUID, Rule> activatedRules;
+    private TraverseTree<Rule> activatedRulesTree;
 
-    public ScratchStorage() {
+    ScratchStorage() {
         usedFacts = new HashMap<>();
-        inactiveRules = new ArrayList<Rule>();
-        activatedRules = new TreeMap<>();
+        activatedRulesTree = new TraverseTree<>();
     }
 
-    public void useFact(Fact fact) {
+    void useFact(Fact fact) {
         usedFacts.put(fact.getVariable().getGuid(), fact);
     }
 
-    public List<Fact> getUsedFacts() {
+    boolean variableIsUsed(Variable variable) {
+        return usedFacts.containsKey(variable.getGuid());
+    }
+
+    Value getVariableValue(Variable variable) {
+        Assignable value = usedFacts.get(variable.getGuid()).getAssignable();
+        while (value != null && !(value instanceof Value))
+            value = usedFacts.containsKey(value.getGuid()) ? usedFacts.get(value.getGuid()).getAssignable() : null;
+        return (Value) value;
+    }
+
+    List<Fact> getUsedFacts() {
         return new ArrayList<>(usedFacts.values());
     }
 
-    public List<Rule> getInactiveRules() {
-        return inactiveRules;
+    TraverseTree<Rule> getActivatedRulesTree() {
+        return activatedRulesTree;
     }
 
-    public TreeMap<UUID, Rule> getActivatedRules() {
-        return activatedRules;
+    void clear() {
+        usedFacts.clear();
+        activatedRulesTree.clear();
     }
 }
