@@ -17,7 +17,7 @@
          </VBox.margin>
       </Label>
         <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
-            <VBox fx:id="consultingBox" prefHeight="200.0" prefWidth="100.0" />
+            <VBox fx:id="consultingBox" alignment="TOP_CENTER" />
         </ScrollPane>
         <HBox fx:id="interactionBox" alignment="CENTER" disable="true">
             <ComboBox fx:id="answersCombobox">

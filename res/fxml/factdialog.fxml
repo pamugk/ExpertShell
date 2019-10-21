@@ -17,10 +17,10 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expertshellgui.FactDialogController">
-    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <HBox VBox.vgrow="ALWAYS">
-            <GridPane minWidth="100.0">
+<AnchorPane minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expertshellgui.FactDialogController">
+    <VBox minHeight="-Infinity" minWidth="-Infinity" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <HBox alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS">
+            <GridPane minHeight="-Infinity" minWidth="-Infinity">
                 <columnConstraints>
                     <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
                     <ColumnConstraints hgrow="SOMETIMES" />
@@ -50,8 +50,11 @@
                   <Insets right="10.0" />
                </GridPane.margin>
                 </Button>
-                <ComboBox fx:id="leftVarCombobox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-                <Button fx:id="editLeftVarBtn" disable="true" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                <ComboBox fx:id="leftVarCombobox" maxWidth="1.7976931348623157E308" minWidth="100.0" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin></ComboBox>
+                <Button fx:id="editLeftVarBtn" disable="true" mnemonicParsing="false" onAction="#editLeftVarBtn_OnAction" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                     <graphic>
                         <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                             <viewport>
@@ -68,16 +71,8 @@
                </GridPane.margin>
                 </Button>
             </GridPane>
-            <GridPane>
-                <columnConstraints>
-                    <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
-                </columnConstraints>
-                <rowConstraints>
-                    <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
-                </rowConstraints>
-                <Label alignment="CENTER" prefWidth="60.0" text="=" GridPane.halignment="CENTER" />
-            </GridPane>
-            <GridPane alignment="CENTER">
+             <Label alignment="CENTER" prefWidth="60.0" text="=" />
+            <GridPane alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity">
                 <columnConstraints>
                     <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
                     <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
@@ -135,10 +130,13 @@
                   <Insets right="10.0" />
                </GridPane.margin>
                 </VBox>
-                <ComboBox fx:id="rightFactableCombobox" maxWidth="1.7976931348623157E308" minWidth="100.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                <ComboBox fx:id="rightFactableCombobox" maxWidth="1.7976931348623157E308" minWidth="100.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin></ComboBox>
             </GridPane>
         </HBox>
-        <GridPane prefWidth="300.0" VBox.vgrow="SOMETIMES">
+        <GridPane minHeight="-Infinity" minWidth="-Infinity" prefWidth="300.0" VBox.vgrow="SOMETIMES">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" />
                 <ColumnConstraints hgrow="SOMETIMES" />
@@ -146,8 +144,14 @@
             <rowConstraints>
                 <RowConstraints valignment="CENTER" vgrow="NEVER" />
             </rowConstraints>
-            <Button fx:id="okBtn" disable="true" mnemonicParsing="false" onAction="#okBtn_OnAction" text="%ok" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-            <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancelBtn_OnAction" text="%cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <Button fx:id="okBtn" disable="true" mnemonicParsing="false" onAction="#okBtn_OnAction" text="%ok" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+            <GridPane.margin>
+               <Insets bottom="20.0" top="20.0" />
+            </GridPane.margin></Button>
+            <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancelBtn_OnAction" text="%cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+            <GridPane.margin>
+               <Insets bottom="20.0" top="20.0" />
+            </GridPane.margin></Button>
         </GridPane>
     </VBox>
 </AnchorPane>

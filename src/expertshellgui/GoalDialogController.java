@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 public class GoalDialogController {
     private Variable goal;
-    private KnowledgeBase kb;
 
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private void close() { ((Stage)okBtn.getScene().getWindow()).close(); }
@@ -29,7 +28,6 @@ public class GoalDialogController {
 
     private void setup(Variable goal, KnowledgeBase kb) {
         this.goal = goal;
-        this.kb = kb;
         varsCombobox.getItems().addAll(kb.getVariables().stream()
                 .filter(var -> var.getVarClass() != Types.REQUESTED).collect(Collectors.toList()));
         varsCombobox.getSelectionModel().select(goal);
@@ -42,6 +40,11 @@ public class GoalDialogController {
         Parent dialogRoot = loader.load();
         GoalDialogController dialog = loader.getController();
         Stage dialogStage = new Stage();
+        dialogStage.setResizable(false);
+        dialogStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                dialogStage.setMaximized(false);
+        });
         dialogStage.setTitle(title);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));

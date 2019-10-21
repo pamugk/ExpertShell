@@ -227,18 +227,19 @@ public class DomainDialogController {
                 }
             });
             cell.setOnDragDropped(dragEvent -> {
-                if (cell.getItem() == null) {
-                    return;
-                }
-
                 Dragboard db = dragEvent.getDragboard();
                 boolean success = false;
 
                 if (db.hasString()) {
                     Value draggedVal = valuesListView.getItems().get(draggedIdx);
-                    int thisIdx = cell.getIndex();
-                    valuesListView.getItems().set(draggedIdx, cell.getItem());
-                    valuesListView.getItems().set(thisIdx,draggedVal);
+                    int thisIdx =
+                            cell.getIndex() < valuesListView.getItems().size() ?
+                            cell.getIndex() : valuesListView.getItems().size()-1;
+                    for (int i = draggedIdx; i > thisIdx; i--)
+                        valuesListView.getItems().set(i, valuesListView.getItems().get(i - 1));
+                    for (int i = draggedIdx; i < thisIdx; i++)
+                        valuesListView.getItems().set(i, valuesListView.getItems().get(i + 1));
+                    valuesListView.getItems().set(thisIdx, draggedVal);
                     success = true;
                     disableOkButton(nameTextField.getText());
                 }

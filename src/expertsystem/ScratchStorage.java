@@ -10,11 +10,11 @@ import java.util.*;
 
 class ScratchStorage {
     private Map<UUID, Fact> usedFacts;
-    private TraverseTree<Rule> activatedRulesTree;
+    private Set<UUID> activatedRules;
 
     ScratchStorage() {
         usedFacts = new HashMap<>();
-        activatedRulesTree = new TraverseTree<>();
+        activatedRules = new HashSet<>();
     }
 
     void useFact(Fact fact) {
@@ -23,6 +23,19 @@ class ScratchStorage {
 
     boolean variableIsUsed(Variable variable) {
         return usedFacts.containsKey(variable.getGuid());
+    }
+
+    boolean ruleIsActivated(Rule rule) {
+        return activatedRules.contains(rule.getGuid());
+    }
+
+    void activateRule(Rule rule) {
+        activatedRules.add(rule.getGuid());
+        rule.getConclusions().forEach(this::useFact);
+    }
+
+    Fact getAssociatedFact(Variable variable) {
+        return usedFacts.get(variable.getGuid());
     }
 
     Value getVariableValue(Variable variable) {
@@ -36,12 +49,12 @@ class ScratchStorage {
         return new ArrayList<>(usedFacts.values());
     }
 
-    TraverseTree<Rule> getActivatedRulesTree() {
-        return activatedRulesTree;
+    boolean isEmpty() {
+        return usedFacts.isEmpty() && activatedRules.isEmpty();
     }
 
     void clear() {
         usedFacts.clear();
-        activatedRulesTree.clear();
+        activatedRules.clear();
     }
 }

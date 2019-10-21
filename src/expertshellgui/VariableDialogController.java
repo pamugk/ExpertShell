@@ -16,22 +16,18 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
-import static java.util.Map.entry;
-
 public class VariableDialogController {
     private KnowledgeBase kb;
+    private Types varClass;
     private Variable variable;
-    private Map<Types, String> types;
     private Image addImage;
 
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     static Variable showAndWait(Variable oldVariable, String title, Image icon, KnowledgeBase kb,
-                                ResourceBundle resources, List<Types> allowedClasses) throws IOException {
+                                ResourceBundle resources, boolean forbidRequestedVars) throws IOException {
         FXMLLoader loader = new FXMLLoader(DomainDialogController.class.getResource("/fxml/variabledialog.fxml"),
                 resources);
         Parent dialogRoot = loader.load();
@@ -41,7 +37,7 @@ public class VariableDialogController {
         dialogStage.getIcons().add(icon);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
-        dialog.setup(oldVariable, kb, allowedClasses);
+        dialog.setup(oldVariable, kb, forbidRequestedVars);
         dialogStage.showAndWait();
         return dialog.getVariable();
     }
@@ -49,27 +45,63 @@ public class VariableDialogController {
 
     private void disableOkButton(String name, String question) {
         okButton.setDisable(name == null ||
-                name.trim().isEmpty() || typeComboBox.getSelectionModel().getSelectedItem() != Types.DEDUCTED
-                        && (question == null || question.trim().isEmpty()) ||
+                name.trim().isEmpty() || !dedVarRB.isSelected() && (question == null || question.trim().isEmpty()) ||
                         kb.getVariables().stream().anyMatch(var ->
-                        !var.getGuid().equals(variable.getGuid()) && var.getName().equals(name)) ||
+                                !var.getGuid().equals(variable.getGuid()) && var.getName().equals(name)) ||
                         domainComboBox.getSelectionModel().getSelectedIndex() == -1
         );
     }
 
     private Variable getVariable() { return variable; }
 
-    private void setup(Variable oldVariable, KnowledgeBase kb, List<Types> allowedClasses) {
+    private void setup(Variable oldVariable, KnowledgeBase kb, boolean forbidRequestedVars) {
         this.variable = oldVariable;
         this.kb = kb;
-        typeComboBox.getItems().addAll(allowedClasses);
+        reqVarRB.setDisable(forbidRequestedVars);
         nameTextField.setText(oldVariable.getName());
+        switch (variable.getVarClass()) {
+            case REQUESTED:
+                reqVarRB.setSelected(true);
+                break;
+            case DEDUCTED:
+                dedVarRB.setSelected(true);
+                break;
+            case REQUESTED_DEDUCTED:
+                reqDedVarRB.setSelected(true);
+                break;
+            case DEDUCTED_REQUESTED:
+                dedReqVarRB.setSelected(true);
+                break;
+        }
         labelTextField.setText(oldVariable.getLabel());
-        typeComboBox.getSelectionModel().select(oldVariable.getVarClass());
         domainComboBox.getItems().addAll(kb.getUsedDomains());
         domainComboBox.getSelectionModel().select(oldVariable.getDomain());
         questionTextArea.setText(oldVariable.getQuestion());
-        autoQuestionChkbox.setSelected(true);
+        autoQuestionChkbox.setSelected(false);
+        if (varClass != Types.DEDUCTED && variable.getQuestion() == null){
+            autoQuestionChkbox.setSelected(true);
+        }
+    }
+
+    private void varTypeChanged(Types newType) {
+        Types oldType = varClass;
+        varClass = newType;
+        if (newType == Types.DEDUCTED){
+            autoQuestionChkbox.setDisable(true);
+            questionTextArea.clear();
+            questionTextArea.setDisable(true);
+            disableOkButton(nameTextField.getText(), questionTextArea.getText());
+        }
+        else {
+            if (oldType == null || oldType == Types.DEDUCTED) {
+                autoQuestionChkbox.setDisable(false);
+                if (!autoQuestionChkbox.isSelected())
+                    autoQuestionChkbox.setSelected(true);
+                else questionTextArea.setText(String.format("%s?", nameTextField.getText()));
+                questionTextArea.setEditable(false);
+            }
+            disableOkButton(nameTextField.getText(), questionTextArea.getText());
+        }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Элементы управления">
@@ -80,7 +112,15 @@ public class VariableDialogController {
     @FXML
     private TextField labelTextField;
     @FXML
-    private ComboBox<Types> typeComboBox;
+    public ToggleGroup typesGroup;
+    @FXML
+    private RadioButton reqVarRB;
+    @FXML
+    private RadioButton reqDedVarRB;
+    @FXML
+    private RadioButton dedVarRB;
+    @FXML
+    private RadioButton dedReqVarRB;
     @FXML
     private Button addButton;
     @FXML
@@ -122,7 +162,7 @@ public class VariableDialogController {
     void okButton_OnAction(ActionEvent event) {
         variable.setName(nameTextField.getText());
         variable.setLabel(labelTextField.getText());
-        variable.setVarClass(typeComboBox.getValue());
+        variable.setVarClass(varClass);
         variable.setDomain(domainComboBox.getValue());
         variable.setQuestion(questionTextArea.getText());
         kb.getUsedDomains().clear();
@@ -135,7 +175,6 @@ public class VariableDialogController {
     void initialize() {
         assert nameTextField != null : "fx:id=\"nameTextField\" was not injected: check your FXML file 'variabledialog.fxml'.";
         assert labelTextField != null : "fx:id=\"labelTextField\" was not injected: check your FXML file 'variabledialog.fxml'.";
-        assert typeComboBox != null : "fx:id=\"typeComboBox\" was not injected: check your FXML file 'variabledialog.fxml'.";
         assert addButton != null : "fx:id=\"addButton\" was not injected: check your FXML file 'variabledialog.fxml'.";
         assert domainComboBox != null : "fx:id=\"domainComboBox\" was not injected: check your FXML file 'variabledialog.fxml'.";
         assert okButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'variabledialog.fxml'.";
@@ -145,43 +184,25 @@ public class VariableDialogController {
                 questionTextArea.setText(String.format("%s?", newName));
             disableOkButton(newName, questionTextArea.getText());
         });
-
-        types = Map.ofEntries(
-                entry(Types.REQUESTED, resources.getString("varReq")),
-                entry(Types.DEDUCTED, resources.getString("varDed")),
-                entry(Types.REQUESTED_DEDUCTED, resources.getString("varRD")),
-                entry(Types.DEDUCTED_REQUESTED, resources.getString("varDR"))
-        );
-        typeComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
-                disableOkButton(nameTextField.getText(), questionTextArea.getText());
-                boolean disableQuestion = newValue == Types.DEDUCTED;
-                autoQuestionChkbox.setDisable(disableQuestion);
-                if (disableQuestion)
-                    questionTextArea.clear();
-                else
-                    if (oldValue == Types.DEDUCTED)
-                        autoQuestionChkbox.setSelected(true);
-                questionTextArea.setDisable(disableQuestion);
+        reqVarRB.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue)
+                varTypeChanged(Types.REQUESTED);
         });
-        typeComboBox.setCellFactory(new Callback<>() {
-            @Override
-            public ListCell<Types> call(ListView<Types> classesListView) {
-                return new ListCell<>() {
-                    @Override
-                    protected void updateItem(Types item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null || empty)
-                            setGraphic(null);
-                        else
-                            setText(types.get(item));
-                    }
-                };
-            }
+        dedVarRB.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue)
+                varTypeChanged(Types.DEDUCTED);
+        });
+        reqDedVarRB.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue)
+                varTypeChanged(Types.REQUESTED_DEDUCTED);
+        });
+        dedReqVarRB.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue)
+                varTypeChanged(Types.DEDUCTED_REQUESTED);
         });
         domainComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
                     disableOkButton(nameTextField.getText(), questionTextArea.getText());
                 });
-
         domainComboBox.setCellFactory(new Callback<>() {
             @Override
             public ListCell<Domain> call(ListView<Domain> domainListView) {
@@ -199,6 +220,7 @@ public class VariableDialogController {
         });
         autoQuestionChkbox.selectedProperty().addListener((observableValue, wasChecked, nowChecked) -> {
             questionTextArea.setDisable(nowChecked);
+            questionTextArea.setEditable(!nowChecked);
             if (nowChecked)
                 questionTextArea.setText(String.format("%s?", nameTextField.getText()));
         });

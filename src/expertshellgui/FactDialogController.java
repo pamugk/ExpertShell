@@ -23,21 +23,18 @@ import java.util.stream.Collectors;
 public class FactDialogController {
     private Fact fact;
     private KnowledgeBase kb;
-    private List<Types> restrictedClasses;
+    private boolean isConclusion;
     private Image addImage;
     private Image editImage;
-    private boolean isPremise;
 
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
-    private void addVariable(ComboBox<? super Variable> varCombo, List<Types> restrictedClasses) {
+    private void addVariable(ComboBox<? super Variable> varCombo, boolean forbidRequestedVars) {
         Variable newVariable;
         try {
             newVariable = VariableDialogController.showAndWait(new Variable(UUID.randomUUID(),
                             resources.getString("newVariable"), null,
-                            restrictedClasses.size() > 0? Types.DEDUCTED : Types.REQUESTED),
-                    resources.getString("addVariable"), addImage, kb, resources,
-                    Arrays.stream(Types.values()).filter(clss -> !restrictedClasses.contains(clss))
-                            .collect(Collectors.toList()));
+                            forbidRequestedVars ? Types.DEDUCTED : Types.REQUESTED),
+                    resources.getString("addVariable"), addImage, kb, resources, forbidRequestedVars);
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -58,15 +55,13 @@ public class FactDialogController {
                 !sourceDomainRadiobtn.isSelected() && rightFactableCombobox.getSelectionModel().getSelectedIndex() == -1);
     }
 
-    private void editVariable(ComboBox<? super Variable> varCombo, List<Types> restrictedClasses) {
+    private void editVariable(ComboBox<? super Variable> varCombo, boolean forbidRequestedVars) {
         int idx = varCombo.getSelectionModel().getSelectedIndex();
         Variable editedVariable;
         try {
             editedVariable = VariableDialogController.showAndWait(
                     (Variable) varCombo.getItems().get(idx), resources.getString("editVariable"),
-                    editImage, kb, resources,
-                    Arrays.stream(Types.values()).filter(clss -> !restrictedClasses.contains(clss))
-                            .collect(Collectors.toList()));
+                    editImage, kb, resources, forbidRequestedVars);
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -85,6 +80,7 @@ public class FactDialogController {
         if (sourceVariableRadiobtn.isSelected())
             sourceDomainRadiobtn.setSelected(true);
         else sourceChanged(true);
+        editLeftVarBtn.setDisable(newVar == null);
         disableOkButton();
     }
 
@@ -93,35 +89,44 @@ public class FactDialogController {
         disableOkButton();
     }
 
-    private void setup(Fact oldFact, KnowledgeBase kb, List<Types> restrictedClasses) {
+    private void setup(Fact oldFact, KnowledgeBase kb, boolean isConclusion) {
         this.fact = oldFact;
         this.kb = kb;
-        this.restrictedClasses = restrictedClasses;
-        leftVarCombobox.getItems().setAll(kb.getVariables().stream().filter(
-                variable -> !restrictedClasses.contains(variable.getVarClass())).collect(Collectors.toList()));
+        this.isConclusion = isConclusion;
+        List<Variable> leftVariables = kb.getVariables();
+        if (isConclusion)
+            leftVariables =
+                    leftVariables.stream()
+                            .filter(variable -> variable.getVarClass() != Types.REQUESTED).collect(Collectors.toList());
+        leftVarCombobox.getItems().addAll(leftVariables);
         leftVarCombobox.getSelectionModel().select(oldFact.getVariable());
         rightFactableCombobox.getSelectionModel().select(oldFact.getAssignable());
     }
 
     static Fact showAndWait(Fact oldFact, String title, Image icon, KnowledgeBase kb, ResourceBundle resources,
-                            List<Types> restrictedClasses, boolean isPremise) throws IOException {
+                            boolean isConclusion) throws IOException {
         FXMLLoader loader = new FXMLLoader(DomainDialogController.class.getResource("/fxml/factdialog.fxml"),
                 resources);
         Parent dialogRoot = loader.load();
         FactDialogController dialog = loader.getController();
         Stage dialogStage = new Stage();
+        dialogStage.setResizable(false);
+        dialogStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                dialogStage.setMaximized(false);
+        });
         dialogStage.setTitle(title);
         dialogStage.getIcons().add(icon);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
-        dialog.setup(oldFact, kb, restrictedClasses);
-        if (isPremise) {
-            dialog.leftVarLabel.setText(resources.getString("comparedVar"));
-            dialog.rightVarLabel.setText(resources.getString("comparedVal"));
-        }
-        else {
+        dialog.setup(oldFact, kb, isConclusion);
+        if (isConclusion) {
             dialog.leftVarLabel.setText(resources.getString("changedVar"));
             dialog.rightVarLabel.setText(resources.getString("assignedVal"));
+        }
+        else {
+            dialog.leftVarLabel.setText(resources.getString("comparedVar"));
+            dialog.rightVarLabel.setText(resources.getString("comparedVal"));
         }
         dialogStage.showAndWait();
         return dialog.getFact();
@@ -185,13 +190,13 @@ public class FactDialogController {
     //<editor-fold defaultstate="collapsed" desc="Обработчики событий">
     @FXML
     void addLeftVarBtn_OnAction(ActionEvent event) {
-        addVariable(leftVarCombobox, restrictedClasses);
+        addVariable(leftVarCombobox, isConclusion);
     }
 
     @FXML
     void addRightVarBtn_OnAction(ActionEvent event) {
         if (sourceVariableRadiobtn.isSelected())
-            addVariable(rightFactableCombobox, Collections.emptyList());
+            addVariable(rightFactableCombobox, false);
     }
 
     @FXML
@@ -201,9 +206,14 @@ public class FactDialogController {
     }
 
     @FXML
+    public void editLeftVarBtn_OnAction(ActionEvent actionEvent) {
+        editVariable(leftVarCombobox, isConclusion);
+    }
+
+    @FXML
     void editRightVarBtn_OnAction(ActionEvent event) {
         if (sourceVariableRadiobtn.isSelected())
-            editVariable(rightFactableCombobox, Collections.emptyList());
+            editVariable(rightFactableCombobox, false);
     }
 
     @FXML

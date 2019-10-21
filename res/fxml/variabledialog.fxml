@@ -5,8 +5,10 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -17,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefWidth="300.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expertshellgui.VariableDialogController">
-   <VBox layoutX="150.0" layoutY="73.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+   <VBox alignment="CENTER" layoutX="150.0" layoutY="73.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <Label text="%variableName" VBox.vgrow="ALWAYS">
          <VBox.margin>
             <Insets left="10.0" />
@@ -36,7 +38,7 @@
          </padding>
       </Label>
       <TextField fx:id="labelTextField" promptText="%variableLabelPrompt" VBox.vgrow="ALWAYS" />
-      <Label text="%variableType" VBox.vgrow="ALWAYS">
+      <Label alignment="CENTER" text="%variableType" VBox.vgrow="ALWAYS">
          <VBox.margin>
             <Insets left="10.0" />
          </VBox.margin>
@@ -44,9 +46,36 @@
             <Insets bottom="10.0" top="10.0" />
          </padding>
       </Label>
-      <AnchorPane>
-         <ComboBox fx:id="typeComboBox" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-      </AnchorPane>
+      <GridPane>
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="-Infinity" valignment="CENTER" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <RadioButton fx:id="reqVarRB" mnemonicParsing="false" text="%varReq">
+            <toggleGroup>
+               <ToggleGroup fx:id="typesGroup" />
+            </toggleGroup>
+            <GridPane.margin>
+               <Insets top="20.0" />
+            </GridPane.margin>
+         </RadioButton>
+         <RadioButton fx:id="reqDedVarRB" mnemonicParsing="false" text="%varRD" toggleGroup="$typesGroup" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+            <GridPane.margin>
+               <Insets bottom="20.0" top="20.0" />
+            </GridPane.margin></RadioButton>
+         <RadioButton fx:id="dedVarRB" mnemonicParsing="false" text="%varDed" toggleGroup="$typesGroup" GridPane.columnIndex="1">
+            <GridPane.margin>
+               <Insets top="20.0" />
+            </GridPane.margin></RadioButton>
+         <RadioButton fx:id="dedReqVarRB" mnemonicParsing="false" text="%varDR" toggleGroup="$typesGroup" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <GridPane.margin>
+               <Insets bottom="20.0" top="20.0" />
+            </GridPane.margin></RadioButton>
+      </GridPane>
       <GridPane>
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
@@ -81,13 +110,11 @@
          <rowConstraints>
             <RowConstraints vgrow="SOMETIMES" />
          </rowConstraints>
-         <children>
-            <Label text="%variableQuestion" />
-            <CheckBox fx:id="autoQuestionChkbox" mnemonicParsing="false" text="%autoQuestion" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER" />
-         </children>
          <padding>
             <Insets bottom="10.0" top="10.0" />
          </padding>
+         <Label text="%variableQuestion" />
+         <CheckBox fx:id="autoQuestionChkbox" mnemonicParsing="false" text="%autoQuestion" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER" />
       </GridPane>
       <TextArea fx:id="questionTextArea" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
       <GridPane>

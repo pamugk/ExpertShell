@@ -20,9 +20,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -60,23 +59,30 @@ public class ConsultDialogController {
 
     private Label createAnswerLabel(Value answer) {
         Label answerLabel = new Label();
+        answerLabel.setMaxWidth(Double.MAX_VALUE);
+        answerLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        answerLabel.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
         answerLabel.setAlignment(Pos.CENTER_RIGHT);
         answerLabel.setPadding(new Insets(20));
+        answerLabel.setWrapText(true);
         answerLabel.setText(answer == null ? resources.getString("idk") : answer.getContent());
         return answerLabel;
     }
 
     private Label createQuestionLabel(String question) {
         Label questionLabel = new Label();
+        questionLabel.setMaxWidth(Double.MAX_VALUE);
+        questionLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        questionLabel.setBackground(new Background(new BackgroundFill(Color.GREY, null, null)));
         questionLabel.setAlignment(Pos.CENTER_LEFT);
         questionLabel.setPadding(new Insets(20));
+        questionLabel.setWrapText(true);
         questionLabel.setText(question);
         return questionLabel;
     }
 
-    private TextArea createResultText(Value value) {
-        TextArea result = new TextArea();
-        result.setEditable(false);
+    private Label createResultLabel(Value value) {
+        Label result = new Label();
         result.setStyle("-fx-text-alignment: left;");
         result.setPadding(new Insets(20));
         result.setText(value == null ?
@@ -89,7 +95,7 @@ public class ConsultDialogController {
     private void postResult(Value value) {
         Platform.runLater(() -> {
             mainBox.getChildren().remove(interactionBox);
-            mainBox.getChildren().add(createResultText(value));
+            mainBox.getChildren().add(createResultLabel(value));
         });
     }
 

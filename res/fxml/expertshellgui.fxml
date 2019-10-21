@@ -278,7 +278,7 @@
                                     </TitledPane>
                                     <TitledPane cacheShape="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%variableQuestion" VBox.vgrow="ALWAYS">
                                         <AnchorPane cacheShape="false">
-                                            <TextArea fx:id="variableQuestionTextArea" cacheShape="false" editable="false" prefHeight="100.0" prefWidth="200.0" promptText="%variableQuestionPrompt" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                            <TextArea fx:id="variableQuestionTextArea" cacheShape="false" editable="false" prefHeight="100.0" prefWidth="200.0" promptText="%variableQuestionPrompt" wrapText="true" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                         </AnchorPane>
                                     </TitledPane>
                                     <TitledPane expanded="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%variableDomain" VBox.vgrow="ALWAYS">

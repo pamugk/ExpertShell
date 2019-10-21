@@ -3,7 +3,6 @@ package expertshellgui;
 import base.knowledgebase.KnowledgeBase;
 import base.rules.Fact;
 import base.rules.Rule;
-import base.variables.Types;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,8 +18,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class RuleDialogController {
@@ -31,11 +28,11 @@ public class RuleDialogController {
     private int draggedIdx;
 
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
-    private void addFact(ListView<Fact> factView, List<Types> forbiddenClasses, boolean isPremise) {
+    private void addFact(ListView<Fact> factView, boolean isConclusion) {
         Fact newFact;
         try {
             newFact = FactDialogController.showAndWait(new Fact(), resources.getString("addFact"),
-                    addImage, kb, resources, forbiddenClasses, isPremise);
+                    addImage, kb, resources, isConclusion);
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -64,13 +61,13 @@ public class RuleDialogController {
                 premisesListView.getItems().isEmpty() || conclusionsListView.getItems().isEmpty());
     }
 
-    private void editFact(ListView<Fact> factView, List<Types> forbiddenClasses, boolean isPremise) {
+    private void editFact(ListView<Fact> factView, boolean isConclusion) {
         int idx = factView.getSelectionModel().getSelectedIndex();
         Fact editedFact;
         try {
             editedFact = FactDialogController.showAndWait(
                     factView.getItems().get(idx), resources.getString("editFact"),
-                    editImage, kb, resources, forbiddenClasses, isPremise);
+                    editImage, kb, resources, isConclusion);
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -136,17 +133,18 @@ public class RuleDialogController {
             }
         });
         cell.setOnDragDropped(dragEvent -> {
-            if (cell.getItem() == null) {
-                return;
-            }
-
             Dragboard db = dragEvent.getDragboard();
             boolean success = false;
 
             if (db.hasString()) {
                 T draggedVal = listView.getItems().get(draggedIdx);
-                int thisIdx = cell.getIndex();
-                listView.getItems().set(draggedIdx, cell.getItem());
+                int thisIdx =
+                        cell.getIndex() < listView.getItems().size() ?
+                                cell.getIndex() : listView.getItems().size()-1;
+                for (int i = draggedIdx; i > thisIdx; i--)
+                    listView.getItems().set(i, listView.getItems().get(i - 1));
+                for (int i = draggedIdx; i < thisIdx; i++)
+                    listView.getItems().set(i, listView.getItems().get(i + 1));
                 listView.getItems().set(thisIdx, draggedVal);
                 success = true;
                 disableOkButton(nameTextField.getText());
@@ -228,12 +226,12 @@ public class RuleDialogController {
     //<editor-fold defaultstate="collapsed" desc="Обработчики событий">
     @FXML
     void addConclusionBtn_OnAction(ActionEvent event) {
-        addFact(conclusionsListView, Collections.singletonList(Types.REQUESTED), false);
+        addFact(conclusionsListView, true);
     }
 
     @FXML
     void addPremiseBtn_OnAction(ActionEvent event) {
-        addFact(premisesListView, Collections.emptyList(), true);
+        addFact(premisesListView, false);
     }
 
     @FXML
@@ -244,12 +242,12 @@ public class RuleDialogController {
 
     @FXML
     void editConclusionBtn_OnAction(ActionEvent event) {
-        editFact(conclusionsListView, Collections.singletonList(Types.REQUESTED), false);
+        editFact(conclusionsListView, true);
     }
 
     @FXML
     void editPremiseBtn_OnAction(ActionEvent event) {
-        editFact(premisesListView, Collections.emptyList(), true);
+        editFact(premisesListView, false);
     }
 
     @FXML
