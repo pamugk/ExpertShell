@@ -9,20 +9,23 @@ import base.variables.Variable;
 import java.util.*;
 
 class ScratchStorage {
-    private Map<UUID, Fact> usedFacts;
+    private List<Fact> usedFacts;
+    private Map<UUID, Integer> varIndices;
     private Set<UUID> activatedRules;
 
     ScratchStorage() {
-        usedFacts = new HashMap<>();
+        usedFacts = new ArrayList<>();
+        varIndices = new HashMap<>();
         activatedRules = new HashSet<>();
     }
 
     void useFact(Fact fact) {
-        usedFacts.put(fact.getVariable().getGuid(), fact);
+        varIndices.put(fact.getVariable().getGuid(), usedFacts.size());
+        usedFacts.add(fact);
     }
 
     boolean variableIsUsed(Variable variable) {
-        return usedFacts.containsKey(variable.getGuid());
+        return varIndices.containsKey(variable.getGuid());
     }
 
     boolean ruleIsActivated(Rule rule) {
@@ -35,19 +38,18 @@ class ScratchStorage {
     }
 
     Fact getAssociatedFact(Variable variable) {
-        return usedFacts.get(variable.getGuid());
+        return usedFacts.get(varIndices.get(variable.getGuid()));
     }
 
     Value getVariableValue(Variable variable) {
-        Assignable value = usedFacts.get(variable.getGuid()).getAssignable();
+        Assignable value = usedFacts.get(varIndices.get(variable.getGuid())).getAssignable();
         while (value != null && !(value instanceof Value))
-            value = usedFacts.containsKey(value.getGuid()) ? usedFacts.get(value.getGuid()).getAssignable() : null;
+            value = varIndices.containsKey(value.getGuid()) ?
+            usedFacts.get(varIndices.get(value.getGuid())).getAssignable() : null;
         return (Value) value;
     }
 
-    List<Fact> getUsedFacts() {
-        return new ArrayList<>(usedFacts.values());
-    }
+    List<Fact> getUsedFacts() { return new ArrayList<>(usedFacts); }
 
     boolean isEmpty() {
         return usedFacts.isEmpty() && activatedRules.isEmpty();
@@ -55,6 +57,7 @@ class ScratchStorage {
 
     void clear() {
         usedFacts.clear();
+        varIndices.clear();
         activatedRules.clear();
     }
 }

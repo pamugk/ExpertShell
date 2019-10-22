@@ -77,7 +77,7 @@
             <Menu fx:id="consultMenu" mnemonicParsing="false" text="%consulting">
                 <MenuItem fx:id="setGoalMenuItem" disable="true" mnemonicParsing="false" onAction="#setGoalMenuItem_OnAction" text="%setGoal" />
                 <MenuItem fx:id="consultMenuItem" disable="true" mnemonicParsing="false" onAction="#consultMenuItem_OnAction" text="%consult" />
-                <MenuItem fx:id="forgetMenuItem" disable="true" mnemonicParsing="false" onAction="#forgetMenuItem_OnAction" text="%forget" />
+                <MenuItem fx:id="forgetMenuItem" disable="true" visible="false" mnemonicParsing="false" onAction="#forgetMenuItem_OnAction" text="%forget" />
             </Menu>
             <Menu fx:id="reasoningMenu" mnemonicParsing="false" text="%reasoning">
                 <MenuItem fx:id="reasoningMenuItem" disable="true" mnemonicParsing="false" onAction="#reasoningMenuItem_OnAction" text="%showReason" />

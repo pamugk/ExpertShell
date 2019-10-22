@@ -2,6 +2,7 @@ package expertshellgui;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -17,9 +18,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -116,11 +115,26 @@ public class ConsultDialogController {
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
         dialog.setup(expertSystem);
-        dialog.start();
+        boolean forget = false;
+        if (!expertSystem.scratchStorageIsEmpty())
+            forget = dialog.showForgetDialog();
+        dialog.start(forget);
         dialogStage.showAndWait();
     }
 
-    private void start() {
+    private boolean showForgetDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                resources.getString("forgetMsg"), ButtonType.YES, ButtonType.NO);
+        alert.setHeaderText(resources.getString("forget"));
+        alert.setTitle(resources.getString("forgetTtl"));
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.YES;
+    }
+
+    private void start(boolean forgetPreviousConsulting) {
+        if (forgetPreviousConsulting)
+            expertSystem.forgetPreviousConsulting();
         new CompletableFuture<Value>().completeAsync(() -> expertSystem.consult()).thenAccept(this::postResult);
     }
 

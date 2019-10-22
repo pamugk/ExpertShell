@@ -23,7 +23,11 @@ class InferentialMechanism {
             RuleReasoningNode ruleNode = new RuleReasoningNode(rule, rnode);
             boolean activated = true;
             for (Fact premise : rule.getPremises()) {
-                VariableReasoningNode ruleVarNode = new VariableReasoningNode(premise.getVariable(), ruleNode);
+                Variable lookedUpVar = premise.getVariable();
+                VariableReasoningNode ruleVarNode =
+                        scratchStorageSupplier.get().variableIsUsed(lookedUpVar) ?
+                        reasoningSubsystemConnector.get().getVarReasoning(lookedUpVar) :
+                        new VariableReasoningNode(lookedUpVar, ruleNode);
                 Value val = evaluateGoal(premise.getVariable(), ruleVarNode);
                 if (premise.getAssignable() instanceof Value)
                     activated = val.getGuid().equals(premise.getAssignable().getGuid());
@@ -57,6 +61,8 @@ class InferentialMechanism {
             return scratchStorageSupplier.get().getVariableValue(goal);
         }
         Value value = null;
+        if (!scratchStorageSupplier.get().variableIsUsed(goal))
+            reasoningSubsystemConnector.get().addReasoning(goal, rnode);
         switch (goal.getVarClass()) {
             case REQUESTED: {
                 value =  questioner.apply(goal);

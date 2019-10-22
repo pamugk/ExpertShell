@@ -13,7 +13,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ReasoningDialogController {
@@ -46,9 +45,8 @@ public class ReasoningDialogController {
         dialog.setup(expertSystem);
         Stage dialogStage = new Stage();
         dialogStage.setTitle(title);
-        dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
-        dialogStage.showAndWait();
+        dialogStage.show();
     }
 
     @FXML
