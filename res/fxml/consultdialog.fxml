@@ -16,7 +16,7 @@
             <Insets bottom="20.0" top="20.0" />
          </VBox.margin>
       </Label>
-        <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="consultScrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
             <VBox fx:id="consultingBox" alignment="TOP_CENTER" />
         </ScrollPane>
         <HBox fx:id="interactionBox" alignment="CENTER" disable="true">

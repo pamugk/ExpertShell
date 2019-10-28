@@ -12,6 +12,7 @@ import base.variables.Variable;
 import expertsystem.ExpertSystem;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -21,8 +22,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class ConsultDialogController {
     private ExpertSystem expertSystem;
@@ -35,6 +36,9 @@ public class ConsultDialogController {
             answersCombobox.getSelectionModel().select(0);
             consultingBox.getChildren().add(createQuestionLabel(variable.getQuestion()));
             interactionBox.setDisable(false);
+
+            consultScrollPane.layout();
+            consultScrollPane.setVvalue(consultScrollPane.getVmax());
         });
         answer = new CompletableFuture<>();
 
@@ -49,10 +53,12 @@ public class ConsultDialogController {
         Platform.runLater(
             () -> {
                 interactionBox.setDisable(true);
-                consultingBox.getChildren().add(createAnswerLabel(finalAwaitedAnswer));
+                Label answer = createAnswerLabel(finalAwaitedAnswer);
+                consultingBox.getChildren().add(answer);
+                consultScrollPane.layout();
+                consultScrollPane.setVvalue(consultScrollPane.getVmax());
             }
         );
-
         return awaitedAnswer;
     }
 
@@ -104,7 +110,7 @@ public class ConsultDialogController {
         this.expertSystem.setQuestioner(this::askQuestion);
     }
 
-    static void showAndWait(String title, ExpertSystem expertSystem, ResourceBundle resources)
+    static void show(String title, ExpertSystem expertSystem, ResourceBundle resources, EventHandler<WindowEvent> onCLose)
             throws IOException {
         FXMLLoader loader = new FXMLLoader(DomainDialogController.class.getResource("/fxml/consultdialog.fxml"),
                 resources);
@@ -112,14 +118,18 @@ public class ConsultDialogController {
         ConsultDialogController dialog = loader.getController();
         Stage dialogStage = new Stage();
         dialogStage.setTitle(title);
-        dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setScene(new Scene(dialogRoot));
         dialog.setup(expertSystem);
         boolean forget = false;
         if (!expertSystem.scratchStorageIsEmpty())
             forget = dialog.showForgetDialog();
+        dialogStage.setOnCloseRequest(event -> {
+            if (!dialog.answer.isDone())
+                dialog.answer.cancel(true);
+            onCLose.handle(event);
+        });
         dialog.start(forget);
-        dialogStage.showAndWait();
+        dialogStage.show();
     }
 
     private boolean showForgetDialog() {
@@ -133,35 +143,28 @@ public class ConsultDialogController {
     }
 
     private void start(boolean forgetPreviousConsulting) {
-        if (forgetPreviousConsulting)
-            expertSystem.forgetPreviousConsulting();
-        new CompletableFuture<Value>().completeAsync(() -> expertSystem.consult()).thenAccept(this::postResult);
+        new CompletableFuture<Value>().completeAsync(() ->
+                expertSystem.consult(forgetPreviousConsulting)).thenAccept(this::postResult);
     }
 
     @FXML
     private ResourceBundle resources;
-
     @FXML
     private URL location;
-
     @FXML
     private VBox mainBox;
-
     @FXML
     private Label goalLabel;
-
+    @FXML
+    private ScrollPane consultScrollPane;
     @FXML
     private VBox consultingBox;
-
     @FXML
     private HBox interactionBox;
-
     @FXML
     private ComboBox<Value> answersCombobox;
-
     @FXML
     private Button answerBtn;
-
     @FXML
     private Button idkBtn;
 

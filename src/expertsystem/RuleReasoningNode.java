@@ -1,5 +1,6 @@
 package expertsystem;
 
+import base.rules.Fact;
 import base.rules.Rule;
 
 import java.util.ArrayList;
@@ -30,11 +31,26 @@ public class RuleReasoningNode extends ReasoningTreeNode {
 
     @Override
     public String getDescription() {
-        return null;
+        return associatedRule.getContent();
     }
 
     @Override
     public String toString() {
         return associatedRule.getName();
+    }
+
+    public List<Fact> collectAssociatedFacts() {
+        List<Fact> associatedFacts = new ArrayList<>();
+        associatedFacts.add(asociatedVar.getAssociatedFact());
+        fillAssociatedFacts(associatedFacts);
+        return associatedFacts;
+    }
+
+    private void fillAssociatedFacts(List<Fact> associatedFacts) {
+        lookedUpVariables.forEach(variable -> {
+            associatedFacts.add(variable.getAssociatedFact());
+            if (variable.getActivatedRule() != null)
+                variable.getActivatedRule().fillAssociatedFacts(associatedFacts);
+        });
     }
 }

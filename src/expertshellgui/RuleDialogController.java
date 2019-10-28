@@ -290,6 +290,9 @@ public class RuleDialogController {
         assert cancelButton != null : "fx:id=\"cancelButton\" was not injected: check your FXML file 'ruledialog.fxml'.";
 
         nameTextField.textProperty().addListener((observableValue, oldName, newName) -> disableOkButton(newName));
+        commentTextArea.textProperty()
+                .addListener((observableValue, oldText, newText) -> disableOkButton(nameTextField.getText()));
+        reasonTextArea.textProperty().addListener((observableValue, oldText, newText) -> disableOkButton(nameTextField.getText()));
 
         premisesListView.setCellFactory(this::generateNewCell);
         premisesListView.getSelectionModel().selectedIndexProperty().addListener(

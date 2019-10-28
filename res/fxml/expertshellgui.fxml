@@ -77,7 +77,6 @@
             <Menu fx:id="consultMenu" mnemonicParsing="false" text="%consulting">
                 <MenuItem fx:id="setGoalMenuItem" disable="true" mnemonicParsing="false" onAction="#setGoalMenuItem_OnAction" text="%setGoal" />
                 <MenuItem fx:id="consultMenuItem" disable="true" mnemonicParsing="false" onAction="#consultMenuItem_OnAction" text="%consult" />
-                <MenuItem fx:id="forgetMenuItem" disable="true" visible="false" mnemonicParsing="false" onAction="#forgetMenuItem_OnAction" text="%forget" />
             </Menu>
             <Menu fx:id="reasoningMenu" mnemonicParsing="false" text="%reasoning">
                 <MenuItem fx:id="reasoningMenuItem" disable="true" mnemonicParsing="false" onAction="#reasoningMenuItem_OnAction" text="%showReason" />
@@ -329,7 +328,12 @@
                             </TitledPane>
                             <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="%ruleComment" VBox.vgrow="ALWAYS">
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <TextArea fx:id="ruleCommentTextArea" layoutX="-11.0" layoutY="-21.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <TextArea fx:id="ruleCommentTextArea" layoutX="-11.0" layoutY="-21.0" prefHeight="100.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                </AnchorPane>
+                            </TitledPane>
+                            <TitledPane animated="false" text="%ruleReason">
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <TextArea fx:id="ruleReasonTextArea" editable="false" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                 </AnchorPane>
                             </TitledPane>
                         </VBox>

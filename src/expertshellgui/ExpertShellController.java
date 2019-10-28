@@ -14,6 +14,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -24,7 +27,10 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import transfer.BinKnowledgeBaseExporter;
+import transfer.BinKnowledgeBaseImporter;
 import transfer.interfaces.KnowledgeBaseExporter;
 import transfer.interfaces.KnowledgeBaseImporter;
 
@@ -161,6 +167,11 @@ public class ExpertShellController {
         cascadeRemoveRules(rulesToRemove);
     }
 
+    private void changeInterfaceBlock(boolean blocked) {
+        mainMenuBar.setDisable(blocked);
+        mainToolBar.setDisable(blocked);
+    }
+
     private void changeInterfaceState() {
         boolean disable = !expertSystem.kbIsLoaded();
 
@@ -192,7 +203,6 @@ public class ExpertShellController {
     }
 
     private void changeInterfaceStateAccordingToMemoryState(boolean memoryIsEmpty) {
-        forgetMenuItem.setDisable(memoryIsEmpty);
         reasoningMenuItem.setDisable(memoryIsEmpty);
         reasoningTool.setDisable(memoryIsEmpty);
     }
@@ -228,7 +238,8 @@ public class ExpertShellController {
 
     private void consult() {
         try {
-            ConsultDialogController.showAndWait(resources.getString("consulting"), expertSystem, resources);
+            changeInterfaceBlock(true);
+            ConsultDialogController.show(resources.getString("consulting"), expertSystem, resources, this::onDialogClose);
             changeInterfaceStateAccordingToMemoryState(false);
         } catch (IOException e) {
             e.printStackTrace();
@@ -425,6 +436,10 @@ public class ExpertShellController {
         changeInterfaceState();
     }
 
+    private void onDialogClose(WindowEvent event) {
+        changeInterfaceBlock(false);
+    }
+
     private void openKb() {
         File newKbFile = generateFileChooser(resources.getString("openKb"),
                 Collections.singletonList(resources.getString("fileExtDescr")),
@@ -455,7 +470,9 @@ public class ExpertShellController {
 
     private void reasoning() {
         try {
-            ReasoningDialogController.showAndWait(resources.getString("reasoning"), expertSystem, resources);
+            changeInterfaceBlock(true);
+            ReasoningDialogController.show(resources.getString("reasoning"), expertSystem, resources, this::onDialogClose);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -526,12 +543,14 @@ public class ExpertShellController {
         rulePremisesListView.getItems().clear();
         ruleConclusionsListView.getItems().clear();
         ruleCommentTextArea.clear();
+        ruleReasonTextArea.clear();
 
         if (!disable) {
             Rule selectedRule = rulesTableView.getItems().get(newIndex.intValue());
             rulePremisesListView.getItems().addAll(selectedRule.getPremises());
             ruleConclusionsListView.getItems().addAll(selectedRule.getConclusions());
             ruleCommentTextArea.setText(selectedRule.getComment());
+            ruleReasonTextArea.setText(selectedRule.getReason());
         }
 
         changeSpecificActionsState(disable);
@@ -592,6 +611,27 @@ public class ExpertShellController {
         }
         expertSystem.getKnowledgeBase().setGoal(newGoal);
         changeInterfaceStateAccordingToGoal(newGoal);
+    }
+
+    public static void show(Stage primaryStage) throws IOException {
+        ResourceBundle bundle = ResourceBundle.getBundle("localisation/shellLocalisation");
+        FXMLLoader loader = new FXMLLoader(ExpertShellController.class.getResource("/fxml/expertshellgui.fxml"), bundle);
+        Parent root = loader.load();
+        primaryStage.setTitle(bundle.getString("title"));
+        primaryStage.getIcons().add(new Image(ExpertShellController.class.getResourceAsStream("/icons/app.png")));
+        primaryStage.setScene(new Scene(root));
+        ExpertShellController controller = loader.getController();
+        controller.setStage(primaryStage);
+        controller.setExpertSystem(new ExpertSystem());
+        controller.setKbImporter(new BinKnowledgeBaseImporter());
+        controller.setKbExporter(new BinKnowledgeBaseExporter());
+        controller.initialise();
+        primaryStage.setOnCloseRequest(event -> {
+            if (controller.expertSystem.kbIsLoaded())
+                if (!controller.closeKb())
+                    event.consume();
+        });
+        primaryStage.show();
     }
 
     private void showAbout() {
@@ -738,8 +778,6 @@ public class ExpertShellController {
     @FXML
     private MenuItem consultMenuItem;
     @FXML
-    private MenuItem forgetMenuItem;
-    @FXML
     private Menu reasoningMenu;
     @FXML
     private MenuItem reasoningMenuItem;
@@ -817,6 +855,8 @@ public class ExpertShellController {
     private ListView<Fact> ruleConclusionsListView;
     @FXML
     private TextArea ruleCommentTextArea;
+    @FXML
+    private TextArea ruleReasonTextArea;
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Обработчики событий">
     @FXML
@@ -838,8 +878,6 @@ public class ExpertShellController {
     void consultMenuItem_OnAction(ActionEvent event) { consult(); }
     @FXML
     void consultTool_OnAction(ActionEvent event) { consult(); }
-    @FXML
-    void forgetMenuItem_OnAction(ActionEvent event) { forget(); }
     @FXML
     void helpMenuItem_OnAction(ActionEvent event) { showHelp(); }
     @FXML
@@ -887,7 +925,6 @@ public class ExpertShellController {
         assert consultMenu != null : "fx:id=\"consultMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert setGoalMenuItem != null : "fx:id=\"setGoalMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert consultMenuItem != null : "fx:id=\"consultMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
-        assert forgetMenuItem != null : "fx:id=\"forgetMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert reasoningMenu != null : "fx:id=\"reasoningMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert reasoningMenuItem != null : "fx:id=\"reasoningMenuItem\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert helpMenu != null : "fx:id=\"helpMenu\" was not injected: check your FXML file 'expertshellgui.fxml'.";
@@ -925,6 +962,7 @@ public class ExpertShellController {
         assert rulePremisesListView != null : "fx:id=\"rulePremisesListView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert ruleConclusionsListView != null : "fx:id=\"ruleConclusionsListView\" was not injected: check your FXML file 'expertshellgui.fxml'.";
         assert ruleCommentTextArea != null : "fx:id=\"ruleCommentTextArea\" was not injected: check your FXML file 'expertshellgui.fxml'.";
+        assert ruleReasonTextArea != null : "fx:id=\"ruleReasonTextArea\" was not injected: check your FXML file 'expertshellgui.fxml'.";
 
         mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
 

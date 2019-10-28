@@ -23,23 +23,45 @@ public class ExpertSystem {
         inferentialMechanism.setScratchStorageSupplier(() -> scratchStorage);
     }
 
-    public ReasoningTree getReasoning() { return reasoningSubsystem.getReasoning(); }
-    public List<Fact> getUsedFacts() { return scratchStorage.getUsedFacts(); }
-    public Value consult() { return inferentialMechanism.evaluatRootGoal(knowledgeBase.getGoal()); }
+    public ReasoningTree getReasoning() {
+        return reasoningSubsystem.getReasoning();
+    }
+
+    public List<Fact> getUsedFacts() {
+        return scratchStorage.getUsedFacts();
+    }
+
+    public Value consult(boolean cleanPrevConsult) {
+        if (cleanPrevConsult)
+            forgetPreviousConsulting();
+        return inferentialMechanism.evaluatRootGoal(knowledgeBase.getGoal());
+    }
+
     public KnowledgeBase getKnowledgeBase() {
         return knowledgeBase;
     }
+
     public void setKnowledgeBase(KnowledgeBase knowledgeBase) {
         this.knowledgeBase = knowledgeBase;
     }
+
     public boolean kbIsLoaded() {
         return knowledgeBase != null;
     }
-    public void forgetPreviousConsulting() { scratchStorage.clear(); reasoningSubsystem.clear(); }
-    public boolean scratchStorageIsEmpty() { return scratchStorage.isEmpty(); }
+
+    public void forgetPreviousConsulting() {
+        scratchStorage.clear();
+        reasoningSubsystem.clear();
+    }
+
+    public boolean scratchStorageIsEmpty() {
+        return scratchStorage.isEmpty();
+    }
+
     public void setQuestioner(Function<Variable, Value> questioner) {
         inferentialMechanism.setQuestioner(questioner);
     }
+
     public Function<Variable, Value> getQuestioner() {
         return inferentialMechanism.getQuestioner();
     }

@@ -184,6 +184,9 @@ public class VariableDialogController {
                 questionTextArea.setText(String.format("%s?", newName));
             disableOkButton(newName, questionTextArea.getText());
         });
+        labelTextField.textProperty().addListener((observableValue, oldLabel, newLabel) -> {
+            disableOkButton(nameTextField.getText(), questionTextArea.getText());
+        });
         reqVarRB.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             if (newValue)
                 varTypeChanged(Types.REQUESTED);
