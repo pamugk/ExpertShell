@@ -17,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -46,7 +47,8 @@ public class ReasoningDialogController {
         activatedRulesTreeView.setRoot(readVariableTreeNode(rtree.getRoot()));
     }
 
-    static void show(String title, ExpertSystem expertSystem, ResourceBundle resources, EventHandler<WindowEvent> onCLose)
+    static void show(String title, ExpertSystem expertSystem, ResourceBundle resources,
+                     EventHandler<WindowEvent> onCLose, Modality modality)
             throws IOException {
         FXMLLoader loader = new FXMLLoader(DomainDialogController.class.getResource("/fxml/reasoningdialog.fxml"),
                 resources);
@@ -55,6 +57,7 @@ public class ReasoningDialogController {
         dialog.setup(expertSystem);
         Stage dialogStage = new Stage();
         dialogStage.setTitle(title);
+        dialogStage.initModality(modality);
         dialogStage.setScene(new Scene(dialogRoot));
         dialogStage.setOnCloseRequest(onCLose);
         dialogStage.show();

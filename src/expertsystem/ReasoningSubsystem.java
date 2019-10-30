@@ -30,6 +30,7 @@ class ReasoningSubsystem {
 
     void clear() {
         reasoningTree = null;
-        varReasoning.clear();
+        if (varReasoning != null)
+            varReasoning.clear();
     }
 }

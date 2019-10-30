@@ -26,6 +26,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -278,12 +279,12 @@ public class ExpertShellController {
         Domain editedDomain = domainsTableView.getItems().get(idx);
         List<Value> removedVals = new ArrayList<>(editedDomain.getValues());
         List<Variable> associatedVars = collectAssociatedToDomainVars(editedDomain.getGuid());
-        Set<Rule> associatedRules = new HashSet<>();
+        Set<Rule> associatedRules;
         if (associatedVars.size() > 0) {
             associatedRules = new HashSet<>();
             for (Variable variable : associatedVars)
                 associatedRules.addAll(collectAssociatedToVarRules(variable.getGuid()));
-            String message = resources.getString("domainChanging");
+            String message = String.format("%s\n", resources.getString("domainChanging"));
             message += String.format("%s:\n%s\n", resources.getString("variables"),
                     associatedVars.stream().map(Variable::toString).collect(Collectors.joining("; ")));
             if (associatedRules.size() > 0)
@@ -471,7 +472,8 @@ public class ExpertShellController {
     private void reasoning() {
         try {
             changeInterfaceBlock(true);
-            ReasoningDialogController.show(resources.getString("reasoning"), expertSystem, resources, this::onDialogClose);
+            ReasoningDialogController.show(resources.getString("reasoning"), expertSystem, resources,
+                    this::onDialogClose, Modality.NONE);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -641,6 +643,7 @@ public class ExpertShellController {
     private ButtonType showDialog(String title, String header, String message, Alert.AlertType type,
                                   List<ButtonType> btns){
         Alert alert = new Alert(type, message);
+        alert.getButtonTypes().clear();
         alert.getButtonTypes().addAll(btns);
         alert.setHeaderText(header);
         alert.setTitle(title);

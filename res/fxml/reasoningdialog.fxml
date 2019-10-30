@@ -29,32 +29,29 @@
             </GridPane.margin>
         </Label>
         <Label text="%scratchStorage" GridPane.columnIndex="1" />
-      <VBox maxHeight="-Infinity" GridPane.rowIndex="1">
-         <children>
+        <VBox maxHeight="-Infinity" GridPane.rowIndex="1">
+            <GridPane.margin>
+                <Insets left="20.0" right="20.0"/>
+            </GridPane.margin>
             <HBox alignment="CENTER" spacing="20.0">
-               <VBox.margin>
-                  <Insets bottom="20.0" />
-               </VBox.margin>
-               <children>
-                  <Button fx:id="expandAllBtn" mnemonicParsing="false" onAction="#expandAllBtnOnActon" text="%expandAll" />
-                  <Button fx:id="collapseAllBtn" mnemonicParsing="false" onAction="#collapseAllBtn_OnAction" text="%collapseAll" />
-               </children>
+                <VBox.margin>
+                    <Insets bottom="20.0"/>
+                </VBox.margin>
+                <Button fx:id="expandAllBtn" mnemonicParsing="false" onAction="#expandAllBtnOnActon"
+                        text="%expandAll"/>
+                <Button fx:id="collapseAllBtn" mnemonicParsing="false" onAction="#collapseAllBtn_OnAction"
+                        text="%collapseAll"/>
             </HBox>
-              <TreeView fx:id="activatedRulesTreeView" VBox.vgrow="ALWAYS" />
+            <TreeView fx:id="activatedRulesTreeView" VBox.vgrow="ALWAYS"/>
             <VBox fx:id="reasoningVBox" visible="false">
-               <children>
-                  <Label alignment="BOTTOM_CENTER" text="%ruleReason" />
-                  <TextArea fx:id="ruleReasonTextArea" editable="false" maxWidth="-Infinity" wrapText="true" VBox.vgrow="ALWAYS" />
-               </children>
-               <VBox.margin>
-                  <Insets bottom="20.0" top="20.0" />
-               </VBox.margin>
+                <VBox.margin>
+                    <Insets bottom="20.0" top="20.0"/>
+                </VBox.margin>
+                <Label alignment="BOTTOM_CENTER" text="%ruleReason"/>
+                <TextArea fx:id="ruleReasonTextArea" editable="false" maxWidth="-Infinity" wrapText="true"
+                          VBox.vgrow="ALWAYS"/>
             </VBox>
-         </children>
-         <GridPane.margin>
-            <Insets left="20.0" right="20.0" />
-         </GridPane.margin>
-      </VBox>
+        </VBox>
         <ListView fx:id="scratchStorageLV" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <GridPane.margin>
             <Insets bottom="20.0" />

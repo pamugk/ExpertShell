@@ -22,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -99,8 +100,28 @@ public class ConsultDialogController {
 
     private void postResult(Value value) {
         Platform.runLater(() -> {
+            HBox resultBox = new HBox();
+            resultBox.setPrefWidth(Pane.USE_COMPUTED_SIZE);
+            resultBox.setPrefHeight(Pane.USE_COMPUTED_SIZE);
+            resultBox.setAlignment(Pos.CENTER);
+            resultBox.setSpacing(20);
+
+            Button reasoningBtn = new Button();
+            reasoningBtn.setText(resources.getString("showReason"));
+            reasoningBtn.setPrefWidth(Pane.USE_COMPUTED_SIZE);
+            reasoningBtn.setPrefHeight(Pane.USE_COMPUTED_SIZE);
+            reasoningBtn.setOnAction(actionEvent -> {
+                try {
+                    ReasoningDialogController.show(resources.getString("reasoning"), expertSystem, resources,
+                            event -> {}, Modality.NONE);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            resultBox.getChildren().addAll(createResultLabel(value), reasoningBtn);
             mainBox.getChildren().remove(interactionBox);
-            mainBox.getChildren().add(createResultLabel(value));
+            mainBox.getChildren().add(resultBox);
         });
     }
 
