@@ -39,7 +39,6 @@ public class ConsultDialogController {
             interactionBox.setDisable(false);
 
             consultScrollPane.layout();
-            consultScrollPane.setVvalue(consultScrollPane.getVmax());
         });
         answer = new CompletableFuture<>();
 
@@ -57,7 +56,6 @@ public class ConsultDialogController {
                 Label answer = createAnswerLabel(finalAwaitedAnswer);
                 consultingBox.getChildren().add(answer);
                 consultScrollPane.layout();
-                consultScrollPane.setVvalue(consultScrollPane.getVmax());
             }
         );
         return awaitedAnswer;
@@ -208,5 +206,7 @@ public class ConsultDialogController {
         assert answersCombobox != null : "fx:id=\"answersCombobox\" was not injected: check your FXML file 'consultdialog.fxml'.";
         assert answerBtn != null : "fx:id=\"answerBtn\" was not injected: check your FXML file 'consultdialog.fxml'.";
         assert idkBtn != null : "fx:id=\"idkBtn\" was not injected: check your FXML file 'consultdialog.fxml'.";
+
+        consultScrollPane.vvalueProperty().bind(consultingBox.heightProperty());
     }
 }
