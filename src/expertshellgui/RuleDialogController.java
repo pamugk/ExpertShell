@@ -75,6 +75,7 @@ public class RuleDialogController {
         if (editedFact == null)
             return;
         factView.getItems().set(idx, editedFact);
+        disableOkButton(nameTextField.getText());
     }
 
     private <T> ListCell<T> generateNewCell(ListView<T> listView) {

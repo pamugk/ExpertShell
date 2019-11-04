@@ -33,115 +33,102 @@
          <padding>
             <Insets bottom="10.0" top="10.0" />
          </padding></Label>
-      <TextArea fx:id="commentTextArea" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" promptText="%ruleCommentPrompt" />
-      <GridPane>
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-              <Label text="%rulePremises" />
+      <TextArea fx:id="commentTextArea" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" promptText="%ruleCommentPrompt" wrapText="true" />
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <padding>
+                <Insets bottom="10.0" top="10.0"/>
+            </padding>
+            <Label text="%rulePremises"/>
             <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1">
-               <children>
-                  <Button fx:id="addPremiseBtn" mnemonicParsing="false" onAction="#addPremiseBtn_OnAction">
-                     <graphic>
-                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                <Button fx:id="addPremiseBtn" mnemonicParsing="false" onAction="#addPremiseBtn_OnAction">
+                   <graphic>
+                       <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <viewport>
-                              <Rectangle2D height="128.0" width="128.0" />
+                               <Rectangle2D height="128.0" width="128.0"/>
                            </viewport>
-                           <image>
-                              <Image url="@../icons/valueAdd.png" />
-                           </image>
-                        </ImageView>
-                     </graphic></Button>
-                  <Button fx:id="editPremiseBtn" disable="true" mnemonicParsing="false" onAction="#editPremiseBtn_OnAction">
-                     <graphic>
-                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <Image url="@../icons/valueAdd.png"/>
+                       </ImageView>
+                   </graphic>
+                </Button>
+                <Button fx:id="editPremiseBtn" disable="true" mnemonicParsing="false"
+                        onAction="#editPremiseBtn_OnAction">
+                   <graphic>
+                       <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <viewport>
-                              <Rectangle2D height="128.0" width="128.0" />
+                               <Rectangle2D height="128.0" width="128.0"/>
                            </viewport>
-                           <image>
-                              <Image url="@../icons/valueEdit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic></Button>
-                  <Button fx:id="removePremiseBtn" disable="true" mnemonicParsing="false" onAction="#removePremiseBtn_OnAction">
-                     <graphic>
-                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <Image url="@../icons/valueEdit.png"/>
+                       </ImageView>
+                   </graphic>
+                </Button>
+                <Button fx:id="removePremiseBtn" disable="true" mnemonicParsing="false"
+                        onAction="#removePremiseBtn_OnAction">
+                   <graphic>
+                       <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <viewport>
-                              <Rectangle2D height="128.0" width="128.0" />
+                               <Rectangle2D height="128.0" width="128.0"/>
                            </viewport>
-                           <image>
-                              <Image url="@../icons/valueRemove.png" />
-                           </image>
-                        </ImageView>
-                     </graphic></Button>
-               </children>
+                           <Image url="@../icons/valueRemove.png"/>
+                       </ImageView>
+                   </graphic>
+                </Button>
             </HBox>
-         </children>
-         <padding>
-            <Insets bottom="10.0" top="10.0" />
-         </padding>
-      </GridPane>
+        </GridPane>
         <ListView fx:id="premisesListView" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" />
-      <GridPane>
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-              <Label text="%ruleConclusionos" />
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <padding>
+                <Insets bottom="10.0" top="10.0"/>
+            </padding>
+            <Label text="%ruleConclusionos"/>
             <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1">
-               <children>
-                  <Button fx:id="addConclusionBtn" mnemonicParsing="false" onAction="#addConclusionBtn_OnAction">
-                     <graphic>
+                <Button fx:id="addConclusionBtn" mnemonicParsing="false" onAction="#addConclusionBtn_OnAction">
+                    <graphic>
                         <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                           <viewport>
-                              <Rectangle2D height="128.0" width="128.0" />
-                           </viewport>
-                           <image>
-                              <Image url="@../icons/valueAdd.png" />
-                           </image>
+                            <viewport>
+                                <Rectangle2D height="128.0" width="128.0"/>
+                            </viewport>
+                            <Image url="@../icons/valueAdd.png"/>
                         </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="editConclusionBtn" disable="true" mnemonicParsing="false" onAction="#editConclusionBtn_OnAction">
-                     <graphic>
+                    </graphic>
+                </Button>
+                <Button fx:id="editConclusionBtn" disable="true" mnemonicParsing="false"
+                        onAction="#editConclusionBtn_OnAction">
+                    <graphic>
                         <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                           <viewport>
-                              <Rectangle2D height="128.0" width="128.0" />
-                           </viewport>
-                           <image>
-                              <Image url="@../icons/valueEdit.png" />
-                           </image>
+                            <viewport>
+                                <Rectangle2D height="128.0" width="128.0"/>
+                            </viewport>
+                            <Image url="@../icons/valueEdit.png"/>
                         </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="removeConclusionBtn" disable="true" mnemonicParsing="false" onAction="#removeConclusionBtn_OnAction">
-                     <graphic>
+                    </graphic>
+                </Button>
+                <Button fx:id="removeConclusionBtn" disable="true" mnemonicParsing="false"
+                        onAction="#removeConclusionBtn_OnAction">
+                    <graphic>
                         <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                           <viewport>
-                              <Rectangle2D height="128.0" width="128.0" />
-                           </viewport>
-                           <image>
-                              <Image url="@../icons/valueRemove.png" />
-                           </image>
+                            <viewport>
+                                <Rectangle2D height="128.0" width="128.0"/>
+                            </viewport>
+                            <Image url="@../icons/valueRemove.png"/>
                         </ImageView>
-                     </graphic>
-                  </Button>
-               </children>
+                    </graphic>
+                </Button>
             </HBox>
-         </children>
-         <padding>
-            <Insets bottom="10.0" top="10.0" />
-         </padding>
-      </GridPane>
+        </GridPane>
         <ListView fx:id="conclusionsListView" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" />
         <GridPane>
             <columnConstraints>

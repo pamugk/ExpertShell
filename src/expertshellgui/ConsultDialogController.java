@@ -143,7 +143,7 @@ public class ConsultDialogController {
         if (!expertSystem.scratchStorageIsEmpty())
             forget = dialog.showForgetDialog();
         dialogStage.setOnCloseRequest(event -> {
-            if (!dialog.answer.isDone())
+            if (dialog.answer != null && !dialog.answer.isDone())
                 dialog.answer.cancel(true);
             onCLose.handle(event);
         });

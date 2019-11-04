@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
@@ -618,6 +619,76 @@ public class ExpertShellController {
         changeInterfaceStateAccordingToGoal(newGoal);
     }
 
+    private <T> void setupDragAndDrop(TableView<T> table, Supplier<List<T>> collectionSupplier)
+    {
+        table.setRowFactory(tableView -> {
+            TableRow<T> newRow = new TableRow<>();
+            newRow.setOnMouseClicked(mouseEvent -> {
+                if (newRow.isEmpty())
+                    table.getSelectionModel().clearSelection();
+            });
+            newRow.setOnDragDetected(mouseEvent -> {
+                if (newRow.getItem() == null) {
+                    return;
+                }
+
+                draggedIdx = newRow.getIndex();
+                Dragboard dragboard = newRow.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(newRow.getItem().toString());
+                dragboard.setContent(content);
+
+                mouseEvent.consume();
+            });
+            newRow.setOnDragOver(dragEvent -> {
+                if (dragEvent.getGestureSource() != newRow &&
+                        dragEvent.getDragboard().hasString()) {
+                    dragEvent.acceptTransferModes(TransferMode.MOVE);
+                }
+                dragEvent.consume();
+            });
+            newRow.setOnDragEntered(dragEvent -> {
+                if (dragEvent.getGestureSource() != newRow &&
+                        dragEvent.getDragboard().hasString()) {
+                    newRow.setOpacity(0.3);
+                }
+            });
+            newRow.setOnDragExited(dragEvent -> {
+                if (dragEvent.getGestureSource() != newRow &&
+                        dragEvent.getDragboard().hasString()) {
+                    newRow.setOpacity(1);
+                }
+            });
+            newRow.setOnDragDropped(dragEvent -> {
+                Dragboard db = dragEvent.getDragboard();
+                boolean success = false;
+
+                if (db.hasString()) {
+                    T draggedObj = tableView.getItems().get(draggedIdx);
+                    List<T> collection = collectionSupplier.get();
+                    int thisIdx =
+                            newRow.getIndex() < tableView.getItems().size() ?
+                                    newRow.getIndex() : tableView.getItems().size()-1;
+                    for (int i = draggedIdx; i > thisIdx; i--) {
+                        tableView.getItems().set(i, tableView.getItems().get(i - 1));
+                        collection.set(i, collection.get(i - 1));
+                    }
+                    for (int i = draggedIdx; i < thisIdx; i++) {
+                        tableView.getItems().set(i, tableView.getItems().get(i + 1));
+                        collection.set(i, collection.get(i + 1));
+                    }
+                    tableView.getItems().set(thisIdx, draggedObj);
+                    collection.set(thisIdx, draggedObj);
+                    success = true;
+                }
+                dragEvent.setDropCompleted(success);
+                dragEvent.consume();
+            });
+            newRow.setOnDragDone(DragEvent::consume);
+            return newRow;
+        });
+    }
+
     public static void show(Stage primaryStage) throws IOException {
         ResourceBundle bundle = ResourceBundle.getBundle("localisation/shellLocalisation");
         FXMLLoader loader = new FXMLLoader(ExpertShellController.class.getResource("/fxml/expertshellgui.fxml"), bundle);
@@ -973,85 +1044,13 @@ public class ExpertShellController {
         mainTabPane.getSelectionModel().selectedItemProperty().addListener(this::tabChanged);
 
         domainsTableView.getSelectionModel().selectedIndexProperty().addListener(this::domainTableViewSelectionChanged);
-        domainsTableView.setRowFactory(domainTableView -> {
-            TableRow<Domain> newRow = new TableRow<>();
-            newRow.setOnMouseClicked(mouseEvent -> {
-                if (newRow.isEmpty())
-                    domainTableView.getSelectionModel().clearSelection();
-            });
-            return newRow;
-        });
+        setupDragAndDrop(domainsTableView, () -> expertSystem.getKnowledgeBase().getUsedDomains());
         domainNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         domainTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
         generateListViewCellFactory(domainValuesListView);
 
         rulesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
-        rulesTableView.setRowFactory(ruleTableView -> {
-            TableRow<Rule> newRow = new TableRow<>();
-            newRow.setOnMouseClicked(mouseEvent -> {
-                if (newRow.isEmpty())
-                    rulesTableView.getSelectionModel().clearSelection();
-            });
-            newRow.setOnDragDetected(mouseEvent -> {
-                if (newRow.getItem() == null) {
-                    return;
-                }
-
-                draggedIdx = newRow.getIndex();
-                Dragboard dragboard = newRow.startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent content = new ClipboardContent();
-                content.putString(newRow.getItem().toString());
-                dragboard.setContent(content);
-
-                mouseEvent.consume();
-            });
-            newRow.setOnDragOver(dragEvent -> {
-                if (dragEvent.getGestureSource() != newRow &&
-                        dragEvent.getDragboard().hasString()) {
-                    dragEvent.acceptTransferModes(TransferMode.MOVE);
-                }
-                dragEvent.consume();
-            });
-            newRow.setOnDragEntered(dragEvent -> {
-                if (dragEvent.getGestureSource() != newRow &&
-                        dragEvent.getDragboard().hasString()) {
-                    newRow.setOpacity(0.3);
-                }
-            });
-            newRow.setOnDragExited(dragEvent -> {
-                if (dragEvent.getGestureSource() != newRow &&
-                        dragEvent.getDragboard().hasString()) {
-                    newRow.setOpacity(1);
-                }
-            });
-            newRow.setOnDragDropped(dragEvent -> {
-                Dragboard db = dragEvent.getDragboard();
-                boolean success = false;
-
-                if (db.hasString()) {
-                    Rule draggedRule = ruleTableView.getItems().get(draggedIdx);
-                    int thisIdx =
-                            newRow.getIndex() < ruleTableView.getItems().size() ?
-                                    newRow.getIndex() : ruleTableView.getItems().size()-1;
-                    for (int i = draggedIdx; i > thisIdx; i--) {
-                        ruleTableView.getItems().set(i, ruleTableView.getItems().get(i - 1));
-                        expertSystem.getKnowledgeBase().getRules().set(i, ruleTableView.getItems().get(i - 1));
-                    }
-                    for (int i = draggedIdx; i < thisIdx; i++) {
-                        ruleTableView.getItems().set(i, ruleTableView.getItems().get(i + 1));
-                        expertSystem.getKnowledgeBase().getRules().set(i, ruleTableView.getItems().get(i + 1));
-                    }
-                    ruleTableView.getItems().set(thisIdx, draggedRule);
-                    expertSystem.getKnowledgeBase().getRules().set(thisIdx, draggedRule);
-                    success = true;
-                }
-                dragEvent.setDropCompleted(success);
-
-                dragEvent.consume();
-            });
-            newRow.setOnDragDone(DragEvent::consume);
-            return newRow;
-        });
+        setupDragAndDrop(rulesTableView, () -> expertSystem.getKnowledgeBase().getRules());
         ruleNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         ruleContentColumn.setCellFactory(new Callback<>() {
             @Override
@@ -1107,14 +1106,7 @@ public class ExpertShellController {
             }
         });
 
-        variablesTableView.setRowFactory(variableTableView -> {
-            TableRow<Variable> newRow = new TableRow<>();
-            newRow.setOnMouseClicked(mouseEvent -> {
-                if (newRow.isEmpty())
-                    variablesTableView.getSelectionModel().clearSelection();
-            });
-            return newRow;
-        });
+        setupDragAndDrop(variablesTableView, () -> expertSystem.getKnowledgeBase().getVariables());
         generateListViewCellFactory(varDomainValuesListView);
 
         addImage = new Image("/icons/newItem.png");

@@ -129,6 +129,7 @@ public class ReasoningDialogController {
                     reasoningVBox.setVisible(true);
                     scratchStorageLV.getSelectionModel().select(fact);
                 });
+                ruleReasonTextArea.setText(((RuleReasoningNode)node).getAssociatedRule().getReason());
             }
         });
     }
