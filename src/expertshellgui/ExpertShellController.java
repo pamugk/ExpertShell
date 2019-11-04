@@ -412,8 +412,11 @@ public class ExpertShellController {
     private void fillGUI() {
         if (!expertSystem.kbIsLoaded())
             return;
+        domainsTableView.getItems().clear();
         domainsTableView.getItems().addAll(expertSystem.getKnowledgeBase().getUsedDomains());
+        variablesTableView.getItems().clear();
         variablesTableView.getItems().addAll(expertSystem.getKnowledgeBase().getVariables());
+        rulesTableView.getItems().clear();
         rulesTableView.getItems().addAll(expertSystem.getKnowledgeBase().getRules());
     }
 
