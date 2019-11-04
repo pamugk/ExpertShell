@@ -72,6 +72,7 @@ public class ExpertShellController {
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private Domain baseDomain;
+    private Variable baseVariable;
     private void addDomain() {
         Domain newDomain = baseDomain == null ? new Domain(UUID.randomUUID(),
                 resources.getString("newDomain")) : baseDomain;
@@ -108,10 +109,11 @@ public class ExpertShellController {
     }
 
     private void addVariable() {
-        Variable newVariable;
+        Variable newVariable = baseVariable == null ?
+                new Variable(UUID.randomUUID(),resources.getString("newVariable"), null, Types.REQUESTED) :
+                baseVariable;
         try {
-            newVariable = VariableDialogController.showAndWait(new Variable(UUID.randomUUID(),
-                            resources.getString("newVariable"), null, Types.REQUESTED),
+            newVariable = VariableDialogController.showAndWait(newVariable,
                     resources.getString("addVariable"), addImage, expertSystem.getKnowledgeBase(), resources,
                     false);
         } catch (IOException e) {
@@ -220,6 +222,19 @@ public class ExpertShellController {
         Domain clone = new Domain(UUID.randomUUID(), baseDomain.getName());
         clone.setType(baseDomain.getType());
         baseDomain.getValues().forEach(val -> clone.getValues().add(new Value(UUID.randomUUID(), val.getContent())));
+        return clone;
+    }
+
+    private Variable cloneVariable(Variable baseVariable)
+    {
+        Variable clone = new Variable(UUID.randomUUID(), baseVariable.getName(),
+                baseVariable.getDomain(), baseVariable.getVarClass());
+        clone.setQuestion(baseVariable.getQuestion());
+        clone.setLabel(baseVariable.getLabel());
+        clone.setLimit(baseVariable.getLimit());
+        clone.setRigor(baseVariable.getRigor());
+        clone.setType(baseVariable.getType());
+        clone.setWhen(baseVariable.getWhen());
         return clone;
     }
 
@@ -342,11 +357,24 @@ public class ExpertShellController {
     private void editVariable() {
         int idx = variablesTableView.getSelectionModel().getSelectedIndex();
         Variable editedVariable = variablesTableView.getItems().get(idx);
+        List<Rule> associatedRules = collectAssociatedToVarRules(editedVariable.getGuid());
+        if (associatedRules.size() > 0) {
+            String message = String.format("%s\n", resources.getString("variableChanging"));
+            message += String.format("%s:\n%s\n", resources.getString("rules"),
+                associatedRules.stream().map(Rule::toString).collect(Collectors.joining("; ")));
+            if (showDialog(resources.getString("editingVariable"),
+                    resources.getString("cloning"), message, Alert.AlertType.WARNING,
+                    Arrays.asList(ButtonType.YES, ButtonType.NO)) == ButtonType.YES) {
+                baseVariable = cloneVariable(editedVariable);
+                addVariable();
+                return;
+            }
+        }
         try {
             editedVariable = VariableDialogController.showAndWait(
                     editedVariable, resources.getString("editVariable"),
                     editImage, expertSystem.getKnowledgeBase(), resources,
-                    collectAssociatedToVarRules(editedVariable.getGuid()).size() > 0
+                    editedVariable.getVarClass() == Types.DEDUCTED
             );
         } catch (IOException e) {
             e.printStackTrace();
