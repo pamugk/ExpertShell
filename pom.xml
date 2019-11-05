@@ -61,29 +61,27 @@
                         </goals>
                         <configuration>
                             <headerType>gui</headerType>
-                            <jar>${project.build.directory}/${artifactId}-${version}-shaded.jar</jar>
-                            <outfile>${project.build.directory}/${artifactId}.exe</outfile>
-                            <downloadUrl>http://java.com/download</downloadUrl>
+                            <jar>${project.build.directory}/${artifactId}-${project.version}-shaded.jar</jar>
+                            <outfile>${project.build.directory}/${project.artifactId}.exe</outfile>
                             <classPath>
                                 <mainClass>Main</mainClass>
                                 <preCp>anything</preCp>
                             </classPath>
                             <icon>app-icon.ico</icon>
                             <jre>
-                                <minVersion>11</minVersion>
-                                <jdkPreference>preferJre</jdkPreference>
+                                <path>${java.home}</path>
                             </jre>
                             <versionInfo>
                                 <fileVersion>1.0.0.0</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
                                 <fileDescription>${project.name}</fileDescription>
-                                <copyright>2019 ПГНИУ, ПАМ</copyright>
+                                <copyright>2019 PSU, PAM</copyright>
                                 <productVersion>1.0.0.0</productVersion>
                                 <txtProductVersion>1.0.0.0</txtProductVersion>
                                 <productName>${project.name}</productName>
-                                <companyName>ПГНИУ</companyName>
-                                <internalName>${artifactId}</internalName>
-                                <originalFilename>${artifactId}.exe</originalFilename>
+                                <companyName>PSU</companyName>
+                                <internalName>${project.artifactId}</internalName>
+                                <originalFilename>${project.artifactId}.exe</originalFilename>
                             </versionInfo>
                         </configuration>
                     </execution>
