@@ -16,6 +16,8 @@ class InferentialMechanism {
     private Supplier<ScratchStorage> scratchStorageSupplier;
 
     private Value deduceGoal(Variable goal, VariableReasoningNode rnode) {
+        if (knowledgeBaseConnector.get().getRules().size() == scratchStorageSupplier.get().getActivatedRulesCount())
+            return null;
         Value value = null;
         for (Rule rule : knowledgeBaseConnector.get().getRules()){
             if (scratchStorageSupplier.get().ruleIsActivated(rule) || rule.getConclusions().stream().noneMatch(fact -> fact.getVariable().getGuid().equals(goal.getGuid())))
@@ -29,6 +31,10 @@ class InferentialMechanism {
                         reasoningSubsystemConnector.get().getVarReasoning(lookedUpVar) :
                         new VariableReasoningNode(lookedUpVar, ruleNode);
                 Value val = evaluateGoal(premise.getVariable(), ruleVarNode);
+                if (val == null){
+                    activated = false;
+                    break;
+                }
                 if (premise.getAssignable() instanceof Value)
                     activated = val.getGuid().equals(premise.getAssignable().getGuid());
                 else

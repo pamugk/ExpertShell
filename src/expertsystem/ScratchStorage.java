@@ -41,6 +41,8 @@ class ScratchStorage {
         return usedFacts.get(varIndices.get(variable.getGuid()));
     }
 
+    int getActivatedRulesCount() { return activatedRules.size(); }
+
     Value getVariableValue(Variable variable) {
         Assignable value = usedFacts.get(varIndices.get(variable.getGuid())).getAssignable();
         while (value != null && !(value instanceof Value))
