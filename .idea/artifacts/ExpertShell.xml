@@ -1,0 +1,29 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" build-on-make="true" name="ExpertShell">
+    <output-path>$PROJECT_DIR$/out/artifacts/ExpertShell</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="App" />
+        <option name="description" value="" />
+        <option name="height" value="768" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="icons">
+          <JavaFxApplicationIcons>
+            <option name="linuxIcon" value="$PROJECT_DIR$/res/icons/app.png" />
+            <option name="windowsIcon" value="$PROJECT_DIR$/res/icons/app-icon.ico" />
+          </JavaFxApplicationIcons>
+        </option>
+        <option name="nativeBundle" value="all" />
+        <option name="title" value="" />
+        <option name="vendor" value="PSU 2019, PAM" />
+        <option name="version" value="1.0a" />
+        <option name="width" value="1024" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="ExpertShell.jar">
+        <element id="module-output" name="ExpertShell" />
+      </element>
+    </root>
+  </artifact>
+</component>
