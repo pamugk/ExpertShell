@@ -20,7 +20,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="ExpertShell" target="1.5" />
+      <module name="ExpertShell" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
