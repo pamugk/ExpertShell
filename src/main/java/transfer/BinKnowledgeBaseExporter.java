@@ -3,7 +3,10 @@ package transfer;
 import base.knowledgebase.KnowledgeBase;
 import transfer.interfaces.KnowledgeBaseExporter;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Locale;
 
 public class BinKnowledgeBaseExporter implements KnowledgeBaseExporter {
@@ -15,7 +18,7 @@ public class BinKnowledgeBaseExporter implements KnowledgeBaseExporter {
     public String getFileExtension() { return "bkb"; }
     @Override
     public void exportKnowledgeBase(File outputFile, KnowledgeBase exportedKb) throws IOException {
-        var outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));
+        ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));
         outputStream.writeObject(exportedKb);
         outputStream.close();
     }

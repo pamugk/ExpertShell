@@ -39,7 +39,7 @@ public class RuleDialogController {
         }
         if (newFact == null)
             return;
-        var currentIdx = factView.getSelectionModel().getSelectedIndex();
+        int currentIdx = factView.getSelectionModel().getSelectedIndex();
         int newIdx;
         if (currentIdx == -1) {
             factView.getItems().add(newFact);
@@ -79,7 +79,7 @@ public class RuleDialogController {
     }
 
     private <T> ListCell<T> generateNewCell(ListView<T> listView) {
-        ListCell<T> newCell = new ListCell<>() {
+        ListCell<T> newCell = new ListCell<T>() {
             @Override
             protected void updateItem(T item, boolean empty) {
                 super.updateItem(item, empty);

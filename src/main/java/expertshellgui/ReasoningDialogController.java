@@ -1,9 +1,5 @@
 package expertshellgui;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import base.rules.Fact;
 import expertsystem.*;
 import javafx.event.ActionEvent;
@@ -18,6 +14,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class ReasoningDialogController {
     private void changeExpandedTreeState(TreeItem<ReasoningTreeNode> node, boolean expanded) {
@@ -96,7 +96,7 @@ public class ReasoningDialogController {
         scratchStorageLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         scratchStorageLV.setCellFactory(factListView -> {
-            ListCell<Fact> cell = new ListCell<>() {
+            ListCell<Fact> cell = new ListCell<Fact>() {
                 @Override
                 protected void updateItem(Fact item, boolean empty) {
                     super.updateItem(item, empty);

@@ -184,9 +184,8 @@ public class VariableDialogController {
                 questionTextArea.setText(String.format("%s?", newName));
             disableOkButton(newName, questionTextArea.getText());
         });
-        labelTextField.textProperty().addListener((observableValue, oldLabel, newLabel) -> {
-            disableOkButton(nameTextField.getText(), questionTextArea.getText());
-        });
+        labelTextField.textProperty().addListener((observableValue, oldLabel, newLabel) ->
+            disableOkButton(nameTextField.getText(), questionTextArea.getText()));
         reqVarRB.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             if (newValue)
                 varTypeChanged(Types.REQUESTED);
@@ -203,13 +202,12 @@ public class VariableDialogController {
             if (newValue)
                 varTypeChanged(Types.DEDUCTED_REQUESTED);
         });
-        domainComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
-                    disableOkButton(nameTextField.getText(), questionTextArea.getText());
-                });
-        domainComboBox.setCellFactory(new Callback<>() {
+        domainComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) ->
+                    disableOkButton(nameTextField.getText(), questionTextArea.getText()));
+        domainComboBox.setCellFactory(new Callback<ListView<Domain>, ListCell<Domain>>() {
             @Override
-            public ListCell<Domain> call(ListView<Domain> domainListView) {
-                return new ListCell<>() {
+            public ListCell<Domain> call(ListView<Domain> param) {
+                return new ListCell<Domain>() {
                     @Override
                     protected void updateItem(Domain item, boolean empty) {
                         super.updateItem(item, empty);

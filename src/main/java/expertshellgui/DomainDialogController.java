@@ -144,7 +144,7 @@ public class DomainDialogController {
     @FXML
     void editButton_OnAction(ActionEvent event) {
         int idx = valuesListView.getSelectionModel().getSelectedIndex();
-        var editedValue = valuesListView.getItems().get(idx);
+        Value editedValue = valuesListView.getItems().get(idx);
         if (showValueDialog(editedValue, resources.getString("newValue"), resources.getString("newValue")))
             valuesListView.getItems().set(idx, editedValue);
         disableOkButton(nameTextField.getText());
@@ -180,7 +180,7 @@ public class DomainDialogController {
         nameTextField.textProperty().addListener(((observableValue, oldValue, newValue) -> disableOkButton(newValue)));
         valuesListView.getSelectionModel().selectedIndexProperty().addListener(this::valuesSelectedIndexChanged);
         valuesListView.setCellFactory(param -> {
-            ListCell<Value> cell = new ListCell<>() {
+            ListCell<Value> cell = new ListCell<Value>() {
                 @Override
                 protected void updateItem(Value item, boolean empty) {
                     super.updateItem(item, empty);

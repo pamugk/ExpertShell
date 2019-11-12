@@ -43,8 +43,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.Map.entry;
-
 public class ExpertShellController {
     private Image addImage;
     private Image editImage;
@@ -59,16 +57,16 @@ public class ExpertShellController {
     private Stage stage;
 
     public ExpertSystem getExpertSystem() { return  expertSystem; }
-    public void setExpertSystem(ExpertSystem expertSystem) { this.expertSystem = expertSystem; }
+    private void setExpertSystem(ExpertSystem expertSystem) { this.expertSystem = expertSystem; }
 
     public KnowledgeBaseExporter getKbExporter() { return kbExporter; }
-    public void setKbExporter(KnowledgeBaseExporter kbExporter) { this.kbExporter = kbExporter; }
+    private void setKbExporter(KnowledgeBaseExporter kbExporter) { this.kbExporter = kbExporter; }
 
     public KnowledgeBaseImporter getKbImporter() { return kbImporter; }
-    public void setKbImporter(KnowledgeBaseImporter kbImporter) { this.kbImporter = kbImporter; }
+    private void setKbImporter(KnowledgeBaseImporter kbImporter) { this.kbImporter = kbImporter; }
 
     public Stage getStage() { return stage; }
-    public void setStage(Stage stage) { this.stage = stage; }
+    private void setStage(Stage stage) { this.stage = stage; }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Вспомогательные методы">
     private Domain baseDomain;
@@ -132,7 +130,7 @@ public class ExpertShellController {
     }
 
     private Optional<String> askKbName(String title, String header, String currentName) {
-        var kbNameDialog = new TextInputDialog(currentName);
+        TextInputDialog kbNameDialog = new TextInputDialog(currentName);
         TextField inputField = kbNameDialog.getEditor();
         BooleanBinding isInvalid = Bindings.createBooleanBinding(() ->
                 inputField.getText().trim().equals(""), inputField.textProperty());
@@ -399,7 +397,7 @@ public class ExpertShellController {
 
     private <T> void generateListViewCellFactory(ListView<T> listView) {
         listView.setCellFactory(valueListView -> {
-            ListCell<T> newCell = new ListCell<>() {
+            ListCell<T> newCell = new ListCell<T>() {
                 @Override
                 protected void updateItem(T item, boolean empty) {
                     super.updateItem(item, empty);
@@ -449,15 +447,14 @@ public class ExpertShellController {
         rulesTableView.getItems().addAll(expertSystem.getKnowledgeBase().getRules());
     }
 
-    public void initialise() {
+    private void initialise() {
         tabChanged(null, null, mainTabPane.getSelectionModel().getSelectedItem());
         updateTitle();
-        types = Map.ofEntries(
-                entry(Types.REQUESTED, resources.getString("varReq")),
-                entry(Types.DEDUCTED, resources.getString("varDed")),
-                entry(Types.REQUESTED_DEDUCTED, resources.getString("varRD")),
-                entry(Types.DEDUCTED_REQUESTED, resources.getString("varDR"))
-        );
+        types = new HashMap<>();
+        types.put(Types.REQUESTED, resources.getString("varReq"));
+        types.put(Types.DEDUCTED, resources.getString("varDed"));
+        types.put(Types.REQUESTED_DEDUCTED, resources.getString("varRD"));
+        types.put(Types.DEDUCTED_REQUESTED, resources.getString("varDR"));
     }
 
     private void newKb() {
@@ -514,8 +511,8 @@ public class ExpertShellController {
 
     private void removeDomain() {
         int idx = domainsTableView.getSelectionModel().getSelectedIndex();
-        var kb = expertSystem.getKnowledgeBase();
-        var uuid = kb.getUsedDomains().get(idx).getGuid();
+        KnowledgeBase kb = expertSystem.getKnowledgeBase();
+        UUID uuid = kb.getUsedDomains().get(idx).getGuid();
         List<Variable> associatedVars = collectAssociatedToDomainVars(uuid);
         Set<Rule> associatedRules = new HashSet<>();
         if (associatedVars.size() > 0) {
@@ -550,7 +547,7 @@ public class ExpertShellController {
 
     private void removeVariable() {
         int idx = variablesTableView.getSelectionModel().getSelectedIndex();
-        var uuid = expertSystem.getKnowledgeBase().getVariables().get(idx).getGuid();
+        UUID uuid = expertSystem.getKnowledgeBase().getVariables().get(idx).getGuid();
         Set<Rule> associatedRules = new HashSet<>(collectAssociatedToVarRules(uuid));
         if (associatedRules.size() > 0) {
             String message = resources.getString("variableRemoval");
@@ -796,7 +793,7 @@ public class ExpertShellController {
     }
 
     private <T> void tableViewSmartInsert(TableView<T> tableView, List<T> kbCollection, T newItem) {
-        var currentIdx = tableView.getSelectionModel().getSelectedIndex();
+        int currentIdx = tableView.getSelectionModel().getSelectedIndex();
         int newIdx;
         if (currentIdx == -1) {
             kbCollection.add(newItem);
@@ -1080,10 +1077,10 @@ public class ExpertShellController {
         rulesTableView.getSelectionModel().selectedIndexProperty().addListener(this::ruleTableViewSelectionChanged);
         setupDragAndDrop(rulesTableView, () -> expertSystem.getKnowledgeBase().getRules());
         ruleNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        ruleContentColumn.setCellFactory(new Callback<>() {
+        ruleContentColumn.setCellFactory(new Callback<TableColumn<Rule, String>, TableCell<Rule, String>>() {
             @Override
             public TableCell<Rule, String> call(TableColumn<Rule, String> ruleStringTableColumn) {
-                return new TableCell<>() {
+                return new TableCell<Rule, String>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -1100,10 +1097,10 @@ public class ExpertShellController {
         variablesTableView.getSelectionModel().selectedItemProperty().addListener(this::variableTableViewSelectionChanged);
         variableNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         variableAttributionColumn.setCellValueFactory(new PropertyValueFactory<>("varClass"));
-        variableAttributionColumn.setCellFactory(new Callback<>() {
+        variableAttributionColumn.setCellFactory(new Callback<TableColumn<Variable, Types>, TableCell<Variable, Types>>() {
             @Override
             public TableCell<Variable, Types> call(TableColumn<Variable, Types> variableClassesTableColumn) {
-                return new TableCell<>() {
+                return new TableCell<Variable, Types>() {
                     @Override
                     protected void updateItem(Types item, boolean empty) {
                         super.updateItem(item, empty);
@@ -1118,10 +1115,10 @@ public class ExpertShellController {
         });
 
         variableDomainColumn.setCellValueFactory(new PropertyValueFactory<>("domain"));
-        variableDomainColumn.setCellFactory(new Callback<>() {
+        variableDomainColumn.setCellFactory(new Callback<TableColumn<Variable, Domain>, TableCell<Variable, Domain>>() {
             @Override
             public TableCell<Variable, Domain> call(TableColumn<Variable, Domain> variableDomainTableColumn) {
-                return new TableCell<>() {
+                return new TableCell<Variable, Domain>() {
                     @Override
                     protected void updateItem(Domain item, boolean empty) {
                         super.updateItem(item, empty);

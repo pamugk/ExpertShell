@@ -21,7 +21,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="expert-shell" target="11" />
-      <module name="ExpertShell" target="11" />
+      <module name="ExpertShell" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>
